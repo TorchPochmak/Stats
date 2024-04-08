@@ -19,4 +19,5 @@ start_date_str = "18.02.2003"
 end_date_str = "18.01.2005"
 intervals = split_date_interval(start_date_str, end_date_str)
 print(intervals)
-
+g = ['rh', 'df']
+print(type(g))
