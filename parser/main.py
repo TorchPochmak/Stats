@@ -35,7 +35,6 @@ mkpath(download_path)
 
 print('Files will be in ' + download_path)
 
-
 emitent_list = queries.define_market_emitents(market)[1]
 
 #SimpleQuery objects

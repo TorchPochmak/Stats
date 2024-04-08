@@ -29,11 +29,14 @@ def export_to_file(query: SimpleQuery):
         #print(ticker, market, code)
         dat_list = http_get_fin_data(market, code, ticker, from_date,
                            to_date, data[i][Query_Parameter.period])
-        result += dat_list
+        if(i != 0):
+            result += dat_list[1:]
+        else:
+            result += dat_list
         time.sleep(1)
     filename = query.file_format()
     full_path = data[0][Query_Parameter.path] + filename + '.txt'
     print('Loaded: ', full_path)
     with open(full_path, 'w') as f:
         for item in result:
-            f.write("{}\n".format(item))
+            f.write("{}".format(item))

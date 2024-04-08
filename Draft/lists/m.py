@@ -12,7 +12,7 @@ import math
 
 import itertools
 
-prices_main = pd.read_csv('C:/Users/TorchPochmak/Desktop/STATS/lists/VKCO_dec.csv', sep=';')
+prices_main = pd.read_csv('C:/Users/TorchPochmak/Desktop/STATS/lists/VKCO_dec.csv', sep=',')
 prices_main.columns = ['ticker', 'per', 'date', 'time', 'open', 'high', 'low',
        'close', 'vol']
 
