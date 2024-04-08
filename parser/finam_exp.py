@@ -3,10 +3,8 @@ import string
 import urllib.parse
 import urllib.request, time
 import string
-from enum import Enum
 from datetime import datetime as dt, timedelta as td
 from distutils.dir_util import mkpath
-import random
 import gzip
 from datetime import datetime, timedelta
 from enum import IntEnum
@@ -21,6 +19,8 @@ emitents = {}
 #     Сделки - не более чем за 1 день
 #     Внутридневные свечи - не более чем за 4 месяца
 #     Дневные свечи и выше - не более чем за 5 лет
+
+#------------------------------------------------------------------------------------------------------
 
 class Period(IntEnum):
     tick, min1, min5, min10, min15, min30, hour, day, week, month = range(1, 11)
@@ -65,6 +65,9 @@ class SimpleQuery():
                                             self.queries[len(self.queries) - 1][Query_Parameter.date_end]).replace('.', '')
         return filename
 
+#------------------------------------------------------------------------------------------------------
+
+#HTTP Get export stocks
 def get_fin_data(market, code, ticker, from_date, to_date, period,
     dtf=3, tmf=2, msor=1, sep=1, sep2=1, datf=1, at=1, fsp=1):
 
@@ -105,34 +108,9 @@ def get_fin_data(market, code, ticker, from_date, to_date, period,
     response = urllib.request.urlopen(url)
     content = str(response.read(), 'utf-8')
     return content.split('\n')
+#HTTP Get export base info
 
-#SimpleQuery
-def gather_finam_data(query: SimpleQuery):
-    
-    result = []
-
-    data = query.get_queries_list()
-    for i in range(len(data)):
-        ticker = data[i][Query_Parameter.code]
-        market = data[i][Query_Parameter.market]
-        code = define_emitent_code(ticker, market)
-
-        #print(len(data[i][Query_Parameter.date_begin]))
-        from_date = dt.strptime(data[i][Query_Parameter.date_begin], f"%d.%m.%Y").date()
-        to_date = dt.strptime(data[i][Query_Parameter.date_end], f"%d.%m.%Y").date()
-        #print(ticker, market, code)
-        dat_list = get_fin_data(market, code, ticker, from_date,
-                           to_date, data[i][Query_Parameter.period])
-        result += dat_list
-        time.sleep(1)
-    filename = query.file_format()
-    full_path = data[0][Query_Parameter.path] + filename + '.txt'
-    print('Loaded: ', full_path)
-    with open(full_path, 'w') as f:
-        for item in result:
-            f.write("{}\n".format(item))
-
-def load_finam_vars():
+def http_get_finam_info():
 
     #TODO how to create unique OK cookie every time I don't know
     #TODO хватает на 15 минут, как починить...
@@ -173,28 +151,58 @@ def load_finam_vars():
         markts.setdefault(t, []).append(m)
         emitents.setdefault(m, []).append(t.strip('\''))
 
+#--------------------------------------------------------------------------------------------------------
+
+#SimpleQuery
+def gather_finam_data(query: SimpleQuery):
+    
+    result = []
+
+    data = query.get_queries_list()
+    for i in range(len(data)):
+        ticker = data[i][Query_Parameter.code]
+        market = data[i][Query_Parameter.market]
+        code = define_emitent_code(ticker, market)
+
+        #print(len(data[i][Query_Parameter.date_begin]))
+        from_date = dt.strptime(data[i][Query_Parameter.date_begin], f"%d.%m.%Y").date()
+        to_date = dt.strptime(data[i][Query_Parameter.date_end], f"%d.%m.%Y").date()
+        #print(ticker, market, code)
+        dat_list = get_fin_data(market, code, ticker, from_date,
+                           to_date, data[i][Query_Parameter.period])
+        result += dat_list
+        time.sleep(1)
+    filename = query.file_format()
+    full_path = data[0][Query_Parameter.path] + filename + '.txt'
+    print('Loaded: ', full_path)
+    with open(full_path, 'w') as f:
+        for item in result:
+            f.write("{}\n".format(item))
+
+#--------------------------------------------------------------------------------------------------------
+
 def define_emitent_code(ticker, market):
     global tm_to_code
     if not tm_to_code:
-        load_finam_vars()
+        http_get_finam_info()
 
     name = "{}".format(ticker)
 
     return tm_to_code[(name, market)]
 
-def get_emitent_markets(ticker):
+def define_emitent_markets(ticker):
     global markts
     if not markts:
-        load_finam_vars()
+        http_get_finam_info()
 
     name = "'{}'".format(ticker)
 
     return (ticker, sorted(markts[name]))
 
-def get_market_emitents(market):
+def define_market_emitents(market):
     global emitents
     if not emitents:
-        load_finam_vars()
+        http_get_finam_info()
 
     return (market, sorted(emitents[market]))
 
@@ -225,7 +233,7 @@ mkpath(download_path)
 print('Files will be in ' + download_path)
 
 
-emitent_list = get_market_emitents(market)[1]
+emitent_list = define_market_emitents(market)[1]
 
 #SimpleQuery objects
 portfolios = [
