@@ -23,14 +23,16 @@ emitents = {}
 
 class Period(Enum):
     tick, min1, min5, min10, min15, min30, hour, day, week, month = range(1, 11)
-
 class SimpleQuery():
-
 #private:
     date_begin = ''
     date_end = ''
-    #queries = [[market, date_begin1, date_end1, period, path], [market, date_begin2, date_end2, period, path]]
+    #queries = [[market, code, date_begin1, date_end1, period, path], [market, code, date_begin2, date_end2, period, path]]
     queries = []
+    def __init__(self, market, code, date_begin, date_end, period, path):
+        dates = self.split_date_interval(date_begin, date_end, period)
+        for i in range(len(dates)):
+            self.queries.append([market, code, dates[i][0], dates[i][1], period, path])
 #public:    
     def split_date_interval(start_date_str, end_date_str, period):
         interval_delta_days = 0
@@ -51,11 +53,8 @@ class SimpleQuery():
                 result.append((start_date.strftime(date_format), next_date.strftime(date_format)))
                 start_date = next_date  # Переходим к следующему периоду
             return result
-        
-    def __init__(self, market, date_begin, date_end, period, path):
-        dates = split_date_interval(date_begin, date_end, period)
     def get_queries_list(self):
-        return queries
+        return self.queries
 
 def get_fin_data(market, code, ticker, from_date, to_date, period,
     dtf=3, tmf=2, msor=1, sep=1, sep2=1, datf=1, at=1, fsp=1):
@@ -143,7 +142,6 @@ def gather_finam_data(emitents, from_str, to_str,
         for item in result:
             f.write("{}\n".format(item))
 
-
 def load_finam_vars():
 
     #TODO how to create unique cookie every timee I don't know
@@ -221,10 +219,9 @@ def get_market_emitents(market):
 #   US(BATS) = 25, 517
 #   bad markets = 91, 519
 #
-#  'emitents' = [(ticker : market)]
+#  'emitents' = [(ticker, market, frame)]
 
 # set of portfolios to iterate through looks like:
-# ticker and market (for Mosbirzha its 1)
 # portfolios = [
 #     {'emitents' : [('LKOH', '1'), ('SIBN', '1')]}, 
 #     {'emitents' : [('AFLT', '1'), ('BANE', '1')]}
@@ -233,7 +230,7 @@ def get_market_emitents(market):
 
 experiment_number = '0'
 
-market = '200'
+market = '1'
 sample_number = 2
 portfolio_size = 2
 data_folder = ('C:/Users/TorchPochmak/Desktop/')
@@ -246,8 +243,15 @@ print('result files will be in ' + download_path)
 
 emitent_list = get_market_emitents(market)[1]
 
-portfolios = [
+#SimpleQuery objects
 
+portfolios = [
+    {'emitents' : [[('LKOH', '1'), ('SIBN', '1')]]}, 
+    {'emitents' : [('AFLT', '1'), ('BANE', '1')]}    
+]
+
+portfolios2 = [
+    {'emitents': [SimpleQuery('1', 'LKOH', '13.02.2022', '13.02.2023', Period.hour, download_path), SimpleQuery]}
 ]
 print(emitent_list)
 for i in range(sample_number):
