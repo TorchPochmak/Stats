@@ -13,7 +13,7 @@ from .classes import *
 from .http_queries import *
 
 #SimpleQuery
-def export_to_file(query: SimpleQuery):
+def import_to_file(query: SimpleQuery):
     
     result = []
 

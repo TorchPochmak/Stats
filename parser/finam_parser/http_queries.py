@@ -1,3 +1,4 @@
+from io import StringIO
 import urllib
 import string
 import urllib.parse
@@ -9,15 +10,66 @@ from distutils.dir_util import mkpath
 import gzip
 from datetime import datetime, timedelta
 from enum import IntEnum
+import pandas as pd
+import numpy as np
 
 from importlib import resources as impresources
 import templates
 
 from . import classes
 
+from importlib import resources as impresources
+import templates
+
+
 tm_to_code = {}
 markts = {}
 emitents = {}
+
+#slow, потом исправлю
+def hour_to_hour4(df: pd.DataFrame) -> pd.DataFrame:
+    df['DATETIME'] = pd.to_datetime(df['<DATE>'].astype(str) + ' ' + df['<TIME>'].astype(str), format=f'%y%m%d %H%M')
+    df_resampled = df
+    df_resampled.set_index('DATETIME', inplace=True)
+    ohlc_dict = {
+        '<OPEN>': 'first',
+        '<HIGH>': 'max',
+        '<LOW>': 'min',
+        '<CLOSE>': 'last',
+        '<VOL>': 'sum'
+    }
+    df_resampled.resample('4H').apply(ohlc_dict)
+    df_resampled.reset_index(inplace=True)
+    df_resampled['<DATE>'] = df_resampled['DATETIME'].dt.strftime('%y%m%d')
+    df_resampled['<TIME>'] = df_resampled['DATETIME'].dt.strftime('%H%M')
+    df_resampled.dropna(inplace=True)
+    del df_resampled['DATETIME']
+    df_resampled['<PER>'].apply({lambda x: '240'})
+    return df_resampled
+
+def hour_to_hour4_str(content: str, sep: str) -> str:
+    content = content[:len(content) - 1]
+    lst = content.split('\n')
+    for i in range(0, len(lst)):
+        lst[i] = lst[i].split(sep)
+    columns = lst[0]
+    result = ''
+    result += sep.join(columns)
+    #<TICKER>,<PER>,<DATE>,<TIME>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<VOL>
+    for i in range(1, len(lst), 4):
+        result += '\r\n'
+        high = float(lst[i][5])
+        low = float(lst[i][6])
+        close = float(lst[i][7])
+        vol = float(lst[i][8])
+        for j in range(i + 1, min(len(lst), i + 4)):
+            high = np.fmax(high, float(lst[j][5]))
+            low = np.fmin(low, float(lst[j][6]))
+            close = float(lst[j][7])
+            vol += float(lst[j][8])
+        result += sep.join([lst[i][0], '240', lst[i][2], lst[i][3], lst[i][4], str(high), str(low), str(close), str(vol)])
+    return result
+
 
 #------------------------------------------------------------------------------------------------------
 
@@ -28,6 +80,9 @@ def http_get_fin_data(market, code, ticker, from_date, to_date, period,
     from_str = from_date.strftime("%d.%m.%Y")
     to_str = to_date.strftime("%d.%m.%Y")
 
+    period_new = period
+    if(period_new == classes.Period.hour4):
+        period_new = classes.Period.hour
     params  = [ ('market', market),                 #market code
                 ('em', code),                       #instrument code
                 ('code', ticker),                   #instrument ticker
@@ -40,7 +95,7 @@ def http_get_fin_data(market, code, ticker, from_date, to_date, period,
                 ('mt', to_date.month-1),            #period end, month
                 ('yt', to_date.year),               #period end, year
                 ('to', to_str),                     #period end
-                ('p', period.value),                #period type
+                ('p', period_new.value),                #period type
                 ('f', 'data'),                      #file name
                 ('e', '.txt'),                      #file type
                 ('cn', ticker),                     #contract name
@@ -61,10 +116,10 @@ def http_get_fin_data(market, code, ticker, from_date, to_date, period,
     #print(url)
     response = urllib.request.urlopen(url)
     content = str(response.read(), 'utf-8')
-    return content.split('\n')
 
-from importlib import resources as impresources
-import templates
+    if(period == classes.Period.hour4):
+        content = hour_to_hour4_str(content, ',')
+    return content.split('\n')
 
 #HTTP Get export base info
 def http_get_finam_info():
@@ -127,6 +182,10 @@ def define_emitent_code(ticker, market):
         http_get_finam_info()
 
     name = "{}".format(ticker)
+
+    #finam is so cringe
+    if(ticker == 'TCSG'):
+        return '913710'
 
     return tm_to_code[(name, market)]
 

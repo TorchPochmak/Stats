@@ -7,12 +7,11 @@ from datetime import datetime as dt, timedelta as td
 from distutils.dir_util import mkpath
 import gzip
 from datetime import datetime, timedelta
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 
 
 class Period(IntEnum):
-    tick, min1, min5, min10, min15, min30, hour, day, week, month = range(1, 11)
-
+    tick, min1, min5, min10, min15, min30, hour, day, week, month, hour4 = range(1, 12)
 class Query_Parameter(IntEnum):
     market, code, date_begin, date_end, period, path = range(0,6)
 
@@ -36,7 +35,7 @@ class SimpleQuery():
 #public:    
     def split_date_interval(self, start_date_str, end_date_str, period):
         interval_delta_days = 0
-        if(period < int(Period.day)):
+        if(period < int(Period.day) or period == int(Period.hour4)):
             interval_delta_days = 120 # 4 месяца это приблизительно 120 дней 
         else:
             interval_delta_days = 1800 #5 лет прблизительно 1800
@@ -46,6 +45,8 @@ class SimpleQuery():
         end_date = datetime.strptime(end_date_str, date_format)
         
         result = []
+        if(start_date == end_date):
+            return [(start_date.strftime(date_format), end_date.strftime(date_format))]
         while start_date < end_date:
             next_date = start_date + timedelta(days=interval_delta_days) 
             if next_date > end_date:  # Если следующая дата выходит за пределы интервала, приводим её к конечной дате
@@ -59,7 +60,8 @@ class SimpleQuery():
 
     def file_format(self):
         #queries = [market, code, date_begin1, date_end1, period, path]
-        filename = 'stocks_{}_{}_{}'.format(self.queries[0][Query_Parameter.code],
+        filename = 'stocks_{}_{}_{}_{}'.format(self.queries[0][Query_Parameter.code],
+                                            self.queries[0][Query_Parameter.period],
                                             self.queries[0][Query_Parameter.date_begin],
                                             self.queries[len(self.queries) - 1][Query_Parameter.date_end]).replace('.', '')
         return filename
