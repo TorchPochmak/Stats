@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from enum import IntEnum, StrEnum
 
+import matplotlib
 from matplotlib import pyplot as plt
+import matplotlib.gridspec
 from . import file_work as fr
 import pandas as pd
 import numpy as np
@@ -39,9 +41,9 @@ class Candle(Shape):
             col1 = self.color_up
             col2 = self.color_down
             colors = [col1 if prices[fr.COL_NAMES.close][x] >= prices[fr.COL_NAMES.open][x] else col2 for x in range(len(prices))]
-            plt.bar (prices[fr.COL_NAMES.date_iso], prices[fr.COL_NAMES.high] - prices[fr.COL_NAMES.low], 
+            plt.bar (prices[fr.COL_NAMES.date_to_plot], prices[fr.COL_NAMES.high] - prices[fr.COL_NAMES.low], 
                     self.width_min_max, bottom=prices[fr.COL_NAMES.low], color=colors, edgecolor=(0,0,0,0))
-            plt.bar (prices[fr.COL_NAMES.date_iso], prices[fr.COL_NAMES.open] - prices[fr.COL_NAMES.close], 
+            plt.bar (prices[fr.COL_NAMES.date_to_plot], prices[fr.COL_NAMES.open] - prices[fr.COL_NAMES.close], 
                     self.width_candle, bottom=prices[fr.COL_NAMES.close], color=colors, edgecolor=(0,0,0,0))
 
 class Line(Shape):
@@ -51,38 +53,26 @@ class Line(Shape):
         self.color = color
         self.linewidth = linewidth
         self.frame_export_type = frame_export_type
+        self.column_x = fr.COL_NAMES.date_to_plot
+        self.column_y = frame_export_type
     
     @property
     def get_shape_type(self) -> ShapeType:
         return ShapeType.Line
     
+    def change_columns(self, new_x: str, new_y: str):
+        self.column_x = new_x
+        self.column_y = new_y
+
     def draw(self, prices: pd.DataFrame):
-        plt.plot(prices[fr.COL_NAMES.date_iso], prices[self.frame_export_type], 
+        plt.plot(prices[self.column_x], prices[self.column_y], 
                  self.format, linewidth=self.linewidth, color=self.color)
-    def draw_xy(self, x, y):
-        plt.plot(x, y, self.format, linewidth=self.linewidth, color=self.color)
-
-
-
-def create_figure(size_x: int, size_y: int, bg_color):
-    
-    pass
 
 class MainFigure():
     def __init__(self, bg_color: str = '#090625', ticks_color: str = 'white', grid_color: str = 'gray',
-                 interval_x: int = 8, interval_y: int = 2,
-                 center_x: int = -1, center_y: int = -1,
-                 size_x: int = 192, size_y: int = 108):
-        if(center_x == -1):
-            center_x = int(size_x) * 2/3
-        if(center_y == -1):
-            center_y = int(size_y) * 2/3
-        #region INIT
-        self.center_x = center_x
-        self.center_y = center_y
 
-        self.interval_x = interval_x
-        self.interval_y = interval_y
+                 size_x: int = 192, size_y: int = 108):
+        #region INIT
 
         self.size_x = size_x
         self.size_y = size_y
@@ -91,23 +81,16 @@ class MainFigure():
         self.grid_color = grid_color
         self.ticks_color = ticks_color
         #endregion
-        plt.rcParams["figure.figsize"] = [self.size_x * 10, self.size_y * 10]
+        plt.rcParams["figure.figsize"] = [self.size_y * 10, self.size_x * 10]
         plt.rcParams["figure.autolayout"] = True
     
         fg = plt.figure(facecolor=bg_color)
         self.fg = fg
-        self.grid_spec = fg.add_gridspec(size_x, size_y)
-    #TODO axis_y counter 
-    def create_plot(self, count_ticks_x: int, count_ticks_y: int = 0) -> None:
-        
+        self.grid_spec = fg.add_gridspec(size_y, size_x)
         pass
+    #TODO axis_y counter 
 
-    def set_xtick(freq: int, frame: pd.DataFrame, fontsize: int = 7):
-        plt.xticks(np.arange(0, len(frame), len(frame) / freq), fontsize = fontsize)
-
-    def set_ytick(freq: int, frame: pd.DataFrame, fontsize: int = 7):
-        plt.yticks(np.arange(0, len(frame), len(frame) / freq), fontsize = fontsize)
-
+    #PRIVATE
     def set_axes_theme(self, ax: plt.Axes): #mg is MainFigure
 
         ax.tick_params(axis='x', colors=self.ticks_color)
@@ -128,49 +111,115 @@ class MainFigure():
     #?grid_spec is only for MainFigure, use mg.gs[a:b, c:d]
     #? for frame: typical, frame.index -> 0,1,2,3...............
 
-    def draw_subplot(self, part_gs, count_x, count_y, shape: Shape, frame: pd.DataFrame): 
+    def draw_subplot(self,  shape: Shape, frame: pd.DataFrame, part_gs, count_x = 0, count_y = 0): 
         fg_ax = self.fg.add_subplot(part_gs)
         self.set_axes_theme(fg_ax)
-        self.set_xtick(count_x, frame)
-        self.set_ytick(count_y, frame)
+        if(count_x > 0):
+            plt.xticks(np.arange(0, len(frame), len(frame) / count_x), fontsize = 7)
+        if(count_y > 0):
+            plt.xticks(np.arange(0, len(frame), len(frame) / count_y), fontsize = 7)
         shape.draw(frame)
         return fg_ax
 
 
+#INCLUSIVE
+def get_gs_part(gs: matplotlib.gridspec.GridSpec,
+                  begin_x: int = 0, end_x:int = 0,
+                  begin_y: int = 0, end_y: int = 0):
+    fig_width, fig_height = plt.gcf().get_size_inches()
+    fig_width = int(fig_width)
+    fig_height = int(fig_height)
+    if(end_x == 0):
+        end_x = int(fig_height/10 - 1)
+    if(end_y == 0):
+        end_y = int(fig_width/10 - 1)
+    begin_x = int(begin_x)
+    begin_y = int(begin_y)
+    end_x = int(end_x)
+    end_y = int(end_y)
+    return gs[begin_y:end_y, begin_x:end_x]
 
-# shape_candle = finam_plot.Candle()
-# shape_line = finam_plot.Line()
-# #----------------------------------------------------------------------------------------
+#region grid_spec types 
+#type 1
+# -------------------------------------------------
+# |                                               |
+# |                                               |
+# |                     0                         |
+# |                                               |
+# |                                               |
+# |                                               |
+# -------------------------------------------------
 
-# fg_ax1 = fg.add_subplot(gs[0:center_x, 0:center_y])
-# finam_plot.set_axes_theme(fg_ax1)
-# finam_plot.set_xtick_freq(16, prices_main)
-# shape_candle.draw(prices_main)
-# #-------------------------------------------------------------------------------
+#type 2
+# -------------------------------------------------  
+# |                                               |  
+# |                                               |  
+# |                                               |  
+# |                       0                       |  
+# |                                               |  
+# |                                               |  
+# ------------------------------------------------- 
 
-# fg_ax2 = fg.add_subplot(gs[center_x + interval_x:, center_y + interval_y:])
-# finam_plot.set_axes_theme(fg_ax2)
-# finam_plot.set_xtick_freq(5, prices_second)
+# -------------------------------------------------  
+# |                         1...                  |  
+# -------------------------------------------------  
+# |                         count                 |  
+# -------------------------------------------------  
 
-# shape_candle.draw(prices_second)
+#type 3
+# -------------------------------------------------  -------------------------------------------------
+# |                                               |  |                                               |
+# |                                               |  |                                               |
+# |                                               |  |                                               |
+# |                      0                        |  |                       1                       |
+# |                                               |  |                                               |
+# |                                               |  |                                               |
+# -------------------------------------------------  -------------------------------------------------
 
-# mn = min(prices_second[fw.COL_NAMES.low])
-# mx = max(prices_second[fw.COL_NAMES.high])
+# -------------------------------------------------  -------------------------------------------------
+# |                         2...                  |  |                                               |
+# -------------------------------------------------  |                    len(self) - 1              |
+# |                         count + 1             |  |                                               |
+# -------------------------------------------------  -------------------------------------------------
+#endregion
 
-# mask = [prices_second[fw.COL_NAMES.date_iso][x] > prices_main[fw.COL_NAMES.date_iso][0] for x in range(0, len(prices_second))]
-# df = prices_second.loc[mask]
-# fg_ax2.bar(df[fw.COL_NAMES.date_iso], mx, bottom=mn, color=(1,1,1,0.3), width=1)
-# #-----------------------------------------------------------------------------------
-# fg_ax3 = fg.add_subplot(gs[center_x+interval_x:, 0:center_y])
-# finam_plot.set_axes_theme(fg_ax3)
-# finam_plot.set_xtick_freq(16, prices_main)
+def grid_type1(mf: MainFigure) -> list:
+    return [get_gs_part(mf.grid_spec)]
 
-# rsi = RelativeStrengthIndex(input_data=prices_main)
-# merge_df = pd.merge(prices_main, rsi.getTiData(), right_index=True, left_index=True)
-# merge_df['rsi'] = merge_df['rsi'].fillna(0)
-# shape_line.draw_xy(merge_df[fw.COL_NAMES.date_iso], merge_df['rsi'])
+def grid_type2(mf: MainFigure, count: int, 
+               interval_y: int = 2, center_y: int = -1) -> list:
+    if(center_y == -1):
+        center_y = int(mf.size_y * 2/3)
+    res = []
+    res.append(get_gs_part(mf.grid_spec,end_y=center_y))
 
-# #------------------------------------------------------------------------------------
-# fg_ax4 = fg.add_subplot(gs[0:center_x, center_y+interval_y: ])
-# finam_plot.set_axes_theme(fg_ax4)
-# plt.title('DAMN', fontsize=17, position=(0.5, 0.5), color='w')
+    indicator_block_size_y = ((mf.size_y - 1) - (center_y + interval_y)) / count
+
+    block_begin_y = center_y + interval_y
+    for i in range(count):
+        res.append(get_gs_part(mf.grid_spec,begin_y=block_begin_y, end_y=block_begin_y + indicator_block_size_y))
+        block_begin_y += indicator_block_size_y
+    return res
+
+def grid_type3(mf: MainFigure, count: int, 
+    interval_x: int = 8, interval_y: int = 2,
+    center_x: int = -1, center_y: int = -1):
+
+    if(center_x == -1):
+            center_x = int(mf.size_x * 2/3)
+    if(center_y == -1):
+        center_y = int(mf.size_y * 2/3)
+    
+    res = []
+    res.append(get_gs_part(mf.grid_spec, end_x=center_x, end_y=center_y))
+    res.append(get_gs_part(mf.grid_spec,begin_x=center_x + interval_x, end_y=center_y))
+
+    indicator_block_size_y = ((mf.size_y - 1) - (center_y + interval_y)) / count
+
+    block_begin_y = center_y + interval_y
+    for i in range(count):
+        res.append(get_gs_part(mf.grid_spec,end_x=center_x, begin_y=block_begin_y, end_y=block_begin_y + indicator_block_size_y))
+        block_begin_y += indicator_block_size_y
+    res.append(get_gs_part(mf.grid_spec,begin_x=center_x + interval_x, begin_y=center_y + interval_y))
+    return res
+
