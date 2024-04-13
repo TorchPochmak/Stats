@@ -8,6 +8,7 @@ from distutils.dir_util import mkpath
 import gzip
 from datetime import datetime, timedelta
 from enum import IntEnum, StrEnum
+import pandas as pd
 
 
 class Period(IntEnum):
@@ -15,7 +16,21 @@ class Period(IntEnum):
 class Query_Parameter(IntEnum):
     market, code, date_begin, date_end, period, path = range(0,6)
 
-# Ограничения
+DICT_HIGHER_TIMEFRAME = {
+    Period.tick :   [Period.min1, 5],# didn't analyze lol
+    Period.min1 :   [Period.min5, 5], #*5
+    Period.min5 :   [Period.min15, 3],#*3
+    Period.min10 :  [Period.min30, 3], #*3
+    Period.min15 :  [Period.hour,  4],#*4
+    Period.min30 :  [Period.hour, 2],#*2
+    Period.hour :   [Period.hour4, 4],#*4
+    Period.hour4 :  [Period.day, 6], #*6
+    Period.day :    [Period.week, 7], #*7
+    Period.week :   [Period.month, 4], #*4
+}
+
+# def calculate_high_tf_date_begin(datetime_end: pd.Timestamp) -> pd.Timestamp:
+    
 # Объем запрашиваемых данных в рамках одного запроса:
 
 #     Сделки - не более чем за 1 день
@@ -40,7 +55,7 @@ class SimpleQuery():
         else:
             interval_delta_days = 1800 #5 лет прблизительно 1800
 
-        date_format = "%d.%m.%Y"
+        date_format = f"%d.%m.%Y"
         start_date = datetime.strptime(start_date_str, date_format)
         end_date = datetime.strptime(end_date_str, date_format)
         
