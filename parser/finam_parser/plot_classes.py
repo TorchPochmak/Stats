@@ -32,19 +32,34 @@ class Candle(Shape):
         self.width_min_max = width_min_max
         self.color_up  = color_up
         self.color_down = color_down
+        self.bar_bottom = fr.COL_NAMES.close
+        self.bar_up = fr.COL_NAMES.open
+        self.error_bar_bottom = fr.COL_NAMES.low
+        self.error_bar_up = fr.COL_NAMES.high
+        self.x_index = fr.COL_NAMES.date_to_plot
     @property
     def get_shape_type(self) -> ShapeType:
         return ShapeType.Candle 
     
+    def change_columns(self, bar_bottom: str = None, bar_up: str = None,
+                        error_bar_up: str = None, error_bar_bottom: str = None,
+                        x_index: str = None) -> None:
+        if(bar_bottom != None):         self.bar_bottom = bar_bottom
+        if(bar_up != None):             self.bar_up = bar_up
+        if(error_bar_bottom != None):   self.error_bar_bottom = error_bar_bottom
+        if(error_bar_up != None):       self.error_bar_up = error_bar_up
+        if(x_index != None):            self.x_index = x_index
+
+
     def draw(self, prices: pd.DataFrame):
             #only draws a line, no clue about scaling, titles and axes stuff...
             col1 = self.color_up
             col2 = self.color_down
-            colors = [col1 if prices[fr.COL_NAMES.close][x] >= prices[fr.COL_NAMES.open][x] else col2 for x in range(len(prices))]
-            plt.bar (prices[fr.COL_NAMES.date_to_plot], prices[fr.COL_NAMES.high] - prices[fr.COL_NAMES.low], 
-                    self.width_min_max, bottom=prices[fr.COL_NAMES.low], color=colors, edgecolor=(0,0,0,0))
-            plt.bar (prices[fr.COL_NAMES.date_to_plot], prices[fr.COL_NAMES.open] - prices[fr.COL_NAMES.close], 
-                    self.width_candle, bottom=prices[fr.COL_NAMES.close], color=colors, edgecolor=(0,0,0,0))
+            colors = [col1 if prices[self.bar_bottom][x] >= prices[self.bar_up][x] else col2 for x in range(len(prices))]
+            plt.bar (prices[self.x_index], prices[self.error_bar_up] - prices[self.error_bar_bottom], 
+                    self.width_min_max, bottom=prices[self.error_bar_bottom], color=colors, edgecolor=(0,0,0,0))
+            plt.bar (prices[self.x_index], prices[self.bar_up] - prices[self.bar_bottom], 
+                    self.width_candle, bottom=prices[self.bar_bottom], color=colors, edgecolor=(0,0,0,0))
 
 class Line(Shape):
     def __init__(self, format: str = '-', color: str = (1,1,1,0.5), 
@@ -111,13 +126,16 @@ class MainFigure():
     #?grid_spec is only for MainFigure, use mg.gs[a:b, c:d]
     #? for frame: typical, frame.index -> 0,1,2,3...............
 
-    def draw_subplot(self,  shape: Shape, frame: pd.DataFrame, part_gs, count_x = 0, count_y = 0): 
+    def draw_subplot(self,  shape: Shape, frame: pd.DataFrame, part_gs, count_x = 0, count_y = 0, 
+                     x_min_int = 0, x_max_int = 0, y_min_int = 0, y_max_int = 0): 
+        if(x_max_int == 0): x_max_int = len(frame)
+        if(y_max_int == 0): y_max_int = len(frame)
         fg_ax = self.fg.add_subplot(part_gs)
         self.set_axes_theme(fg_ax)
         if(count_x > 0):
-            plt.xticks(np.arange(0, len(frame), len(frame) / count_x), fontsize = 7)
+            plt.xticks(np.arange(x_min_int, x_max_int, x_max_int / count_x), fontsize = 7)
         if(count_y > 0):
-            plt.xticks(np.arange(0, len(frame), len(frame) / count_y), fontsize = 7)
+            plt.yticks(np.arange(y_min_int, y_max_int, y_max_int / count_y), fontsize = 7)
         shape.draw(frame)
         return fg_ax
 

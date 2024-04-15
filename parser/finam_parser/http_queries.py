@@ -164,7 +164,10 @@ def define_emitent_code(ticker, market):
     #finam is so cringe
     if(ticker == 'TCSG'):
         return '913710'
-
+    if(ticker == 'XBTUSD'):
+        return '1822580'
+    if(ticker == 'ETHUSDT'):
+        return '2449224'
     return tm_to_code[(name, market)]
 
 def define_emitent_markets(ticker):

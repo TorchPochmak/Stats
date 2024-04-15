@@ -40,7 +40,7 @@ mkpath(download_path)
 print('Files will be in ' + download_path)
 #----------------------------------------------------------------------------------------------------
 portfolios = [
-    SimpleQuery('1', 'GAZP', '15.03.2023', '15.05.2023', Period.hour4, download_path),
+    SimpleQuery('undefined', 'XBTUSD', '15.03.2023', '14.04.2024', Period.day, download_path),
     SimpleQuery('1', 'GAZP', '15.05.2022', '15.05.2023', Period.day, download_path),
 ]
 #----------------------------------------------------------------------------------------------------
