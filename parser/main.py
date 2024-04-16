@@ -50,7 +50,7 @@ for p in portfolios:
 print('Complete')
 
 #----------------------------------------------------------------------------------------------------
-prices_main = fw.import_from_file('./DATA/' + portfolios[0].file_format() + '.txt')
+prices_main = fw.import_from_file('./DATA/' + portfolios[1].file_format() + '.txt')
 prices_second = fw.import_from_file('./DATA/' + portfolios[1].file_format() + '.txt')
 
 main_figure = MainFigure()
@@ -63,12 +63,13 @@ main_figure.draw_subplot(shape_candle, prices_main, parts[0], count_x=16)
 main_figure.draw_subplot(shape_candle, prices_second, parts[len(parts) - 1], count_x=5)
 #------------------------------------------------------------------------------------------------
 rsi_frame = calc_inds.insert_ind_column(tti.indicators.RelativeStrengthIndex, prices_main)
-
 shape_line_ind = Line()
 shape_line_ind.change_columns(fw.COL_NAMES.date_to_plot, rsi_frame.columns[len(rsi_frame.columns) - 1])
 shape_line_ind.color = 'white'
 
 main_figure.draw_subplot(shape_line, rsi_frame, parts[2], count_x=16)
+# shape_line.color = 'yellow'
+# main_figure.draw_subplot(shape_line, rsi_frame, parts[2], count_x=16)
 #------------------------------------------------------------------------------------------------
 stoch_frame = calc_inds.insert_ind_column(tti.indicators.StochasticOscillator, prices_main)
 

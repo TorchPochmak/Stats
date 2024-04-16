@@ -168,6 +168,8 @@ def define_emitent_code(ticker, market):
         return '1822580'
     if(ticker == 'ETHUSDT'):
         return '2449224'
+    if(ticker == 'VKCO'):
+        return '2901666'
     return tm_to_code[(name, market)]
 
 def define_emitent_markets(ticker):
