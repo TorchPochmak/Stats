@@ -70,6 +70,7 @@ def import_to_file(query: SimpleQuery) -> None:
         #print(ticker, market, code)
         dat_list = http_get_fin_data(market, code, ticker, from_date,
                            to_date, data[i][Query_Parameter.period])
+        dat_list[len(dat_list) - 1] += '\r'
         if(i != 0):
             result += dat_list[1:]
         else:

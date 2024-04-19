@@ -19,7 +19,12 @@ class Shape(ABC):
     @abstractmethod
     def draw(self, frame: pd.DataFrame):
         pass
-    
+
+    def get_min_y(self, prices: pd.DataFrame):
+        pass
+    def get_max_y(self, prices: pd.DataFrame):
+        pass
+
     @property
     @abstractmethod
     def get_shape_type(self) -> ShapeType:
@@ -49,12 +54,17 @@ class Candle(Shape):
         if(error_bar_bottom != None):   self.error_bar_bottom = error_bar_bottom
         if(error_bar_up != None):       self.error_bar_up = error_bar_up
         if(x_index != None):            self.x_index = x_index
-
+    
+    def get_min_y(self, prices: pd.DataFrame):
+        return min(prices[self.error_bar_bottom])
+    def get_max_y(self, prices: pd.DataFrame):
+        return max(prices[self.error_bar_up])
 
     def draw(self, prices: pd.DataFrame):
             #only draws a line, no clue about scaling, titles and axes stuff...
             col1 = self.color_up
             col2 = self.color_down
+            print(len(prices))
             colors = [col1 if prices[self.bar_bottom][x] >= prices[self.bar_up][x] else col2 for x in range(len(prices))]
             plt.bar (prices[self.x_index], prices[self.error_bar_up] - prices[self.error_bar_bottom], 
                     self.width_min_max, bottom=prices[self.error_bar_bottom], color=colors, edgecolor=(0,0,0,0))
@@ -75,14 +85,70 @@ class Line(Shape):
     def get_shape_type(self) -> ShapeType:
         return ShapeType.Line
     
+    def get_min_y(self, prices: pd.DataFrame):
+        return min(prices[self.column_y])
+    def get_max_y(self, prices: pd.DataFrame):
+        return max(prices[self.column_y])
+
     def change_columns(self, new_x: str, new_y: str):
         self.column_x = new_x
         self.column_y = new_y
+
+
 
     def draw(self, prices: pd.DataFrame):
         plt.plot(prices[self.column_x], prices[self.column_y], 
                  self.format, linewidth=self.linewidth, color=self.color)
 
+class Rect():
+    def __init__(self, facecolor: str = (228/256, 223/256, 225/256, 0.3),
+                 edgecolor: str = 'black'):
+        self.facecolor = facecolor
+        self.edgecolor = edgecolor
+    
+    def get_rect_absolute(self, frame:pd.DataFrame, 
+                      min_y: int, max_y: int, 
+                      min_x: int, max_x: int) -> plt.Rectangle:
+        return plt.Rectangle((min_x, min_y), max_x - min_x, max_y - min_y, 
+                             facecolor=self.facecolor, edgecolor=self.edgecolor)
+    
+    #region comments
+    #?pivot has three types = {point_x, left, right}
+    #?direction has two types = {left, right}
+    #?percent use from 0 to 1
+    #endregion
+    def get_rect_percent(self, frame: pd.DataFrame, pivot: str, 
+                     percent: float, direction: str, 
+                     min_y: int, max_y: int, point_x: int = 0,) -> plt.Rectangle:
+        total = len(frame)
+        count_fact = int(percent * float(total))
+        mn = -1 if direction == 'left' else 1
+        right_point = 0
+        left_point = 0
+        if(pivot == 'point_x'):
+            right_point = point_x
+        elif(pivot == 'left'):
+            right_point = len(frame) - 1
+        elif(pivot == 'right'):
+            right_point = 0
+        left_point = right_point + (mn * count_fact)
+        if(mn == -1): #then I should swap
+            (right_point, left_point) = (left_point, right_point)
+        #normalize
+        if(right_point < 0):
+            right_point = 0
+        if(left_point > len(frame) - 1):
+            left_point = len(frame) - 1
+
+        return plt.Rectangle((right_point, min_y), left_point - right_point, max_y - min_y,
+                             facecolor=self.facecolor, edgecolor=self.edgecolor)
+        
+    #? А вдруг забуду, что там нужен add_patch, пусть будет 
+    def draw_rect(self, ax: plt.Axes, rect: plt.Rectangle):
+        print(type(ax))
+        ax.add_patch(rect)
+
+    
 class MainFigure():
     def __init__(self, bg_color: str = '#090625', ticks_color: str = 'white', grid_color: str = 'gray',
 

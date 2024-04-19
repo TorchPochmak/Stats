@@ -39,18 +39,26 @@ download_path = './DATA/'
 mkpath(download_path)
 print('Files will be in ' + download_path)
 #----------------------------------------------------------------------------------------------------
-portfolios = [
-    SimpleQuery('undefined', 'XBTUSD', '15.03.2023', '14.04.2024', Period.day, download_path),
-    SimpleQuery('1', 'GAZP', '15.05.2022', '15.05.2023', Period.day, download_path),
-]
+gazp = SimpleQuery('1', 'GAZP', '1.05.2023', '15.05.2023', Period.hour4, download_path)
+portfolios = [gazp for i in range(0,100)]
 #----------------------------------------------------------------------------------------------------
+
+
 print(f'Importing data to files({len(portfolios)})...')
+f = time.time()
 for p in portfolios:
-    fw.import_to_file(p)
-print('Complete')
+    # fw.import_to_file(p)
+    queries.http_get_fin_data('1',
+                              '913710',
+                              'TCSG',
+                              datetime.strptime(gazp.queries[0][Query_Parameter.date_begin], f'%d.%m.%Y'),
+                              datetime.strptime(gazp.queries[0][Query_Parameter.date_end], f'%d.%m.%Y'),
+                              Period.hour4)
+s = time.time()
+print(s - f)
 
 #----------------------------------------------------------------------------------------------------
-prices_main = fw.import_from_file('./DATA/' + portfolios[1].file_format() + '.txt')
+prices_main = fw.import_from_file('./DATA/' + portfolios[0].file_format() + '.txt')
 prices_second = fw.import_from_file('./DATA/' + portfolios[1].file_format() + '.txt')
 
 main_figure = MainFigure()
@@ -58,16 +66,15 @@ shape_candle = Candle()
 shape_line = Line()
 
 parts = grid_type3(main_figure, 2, interval_x=6, interval_y=4)
-
 main_figure.draw_subplot(shape_candle, prices_main, parts[0], count_x=16)
-main_figure.draw_subplot(shape_candle, prices_second, parts[len(parts) - 1], count_x=5)
+fg_ax_last = main_figure.draw_subplot(shape_candle, prices_second, parts[len(parts) - 1], count_x=5)
 #------------------------------------------------------------------------------------------------
 rsi_frame = calc_inds.insert_ind_column(tti.indicators.RelativeStrengthIndex, prices_main)
 shape_line_ind = Line()
 shape_line_ind.change_columns(fw.COL_NAMES.date_to_plot, rsi_frame.columns[len(rsi_frame.columns) - 1])
 shape_line_ind.color = 'white'
 
-main_figure.draw_subplot(shape_line, rsi_frame, parts[2], count_x=16)
+main_figure.draw_subplot(shape_line_ind, rsi_frame, parts[2], count_x=16)
 # shape_line.color = 'yellow'
 # main_figure.draw_subplot(shape_line, rsi_frame, parts[2], count_x=16)
 #------------------------------------------------------------------------------------------------
@@ -79,4 +86,12 @@ shape_line_ind.color = 'green'
 
 main_figure.draw_subplot(shape_line_ind, stoch_frame, parts[3], count_x=16)
 #------------------------------------------------------------------------------------------------
+#!ANOTHER FIGURES
+mn_y_second = shape_candle.get_min_y(prices_second)
+mx_y_second = shape_candle.get_max_y(prices_second)
+
+rect = Rect()
+real_rect = rect.get_rect_percent(prices_second, 'left', GLOBAL_HIGHER_TF_PERCENTAGE, 'left', mn_y_second, mx_y_second)
+rect.draw_rect(fg_ax_last, real_rect)
+
 plt.show()

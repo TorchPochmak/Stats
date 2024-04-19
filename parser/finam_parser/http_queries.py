@@ -35,18 +35,23 @@ def hour_to_hour4_str(content: str, sep: str) -> str:
     result = ''
     result += sep.join(columns)
     #<TICKER>,<PER>,<DATE>,<TIME>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<VOL>
-    for i in range(1, len(lst), 4):
+    i = 1
+    while(i < len(lst)):
         result += '\r\n'
+        plus = 4
+        if(lst[i][3] == '2300'):
+            plus = 2
         high = float(lst[i][5])
         low = float(lst[i][6])
         close = float(lst[i][7])
         vol = float(lst[i][8])
-        for j in range(i + 1, min(len(lst), i + 4)):
+        for j in range(i + 1, min(len(lst), i + plus)):
             high = np.fmax(high, float(lst[j][5]))
             low = np.fmin(low, float(lst[j][6]))
             close = float(lst[j][7])
             vol += float(lst[j][8])
         result += sep.join([lst[i][0], '240', lst[i][2], lst[i][3], lst[i][4], str(high), str(low), str(close), str(vol)])
+        i += plus
     return result
 
 #------------------------------------------------------------------------------------------------------
