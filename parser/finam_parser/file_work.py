@@ -75,7 +75,6 @@ def import_to_file(query: SimpleQuery) -> None:
             result += dat_list[1:]
         else:
             result += dat_list
-        time.sleep(1)
     filename = query.file_format()
     full_path = data[0][Query_Parameter.path] + filename + '.txt'
     print('Loaded: ', full_path)

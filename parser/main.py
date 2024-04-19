@@ -40,22 +40,25 @@ mkpath(download_path)
 print('Files will be in ' + download_path)
 #----------------------------------------------------------------------------------------------------
 gazp = SimpleQuery('1', 'GAZP', '1.05.2023', '15.05.2023', Period.hour4, download_path)
-portfolios = [gazp for i in range(0,100)]
+g = time.time()
+portfolios2 = [
+    SimpleQuery('1', 'GAZP', '1.05.2023', '15.05.2023', Period.hour4, download_path),
+    SimpleQuery('1', 'TCSG', '1.05.2023', '15.05.2023', Period.day, download_path),
+    SimpleQuery('1', 'TCSG', '1.05.2023', '15.05.2023', Period.hour, download_path),
+    SimpleQuery('1', 'LKOH', '1.05.2023', '15.05.2023', Period.hour, download_path),
+]
+portfolios = portfolios2 * 1000
 #----------------------------------------------------------------------------------------------------
 
-
-print(f'Importing data to files({len(portfolios)})...')
-f = time.time()
-for p in portfolios:
-    # fw.import_to_file(p)
-    queries.http_get_fin_data('1',
-                              '913710',
-                              'TCSG',
-                              datetime.strptime(gazp.queries[0][Query_Parameter.date_begin], f'%d.%m.%Y'),
-                              datetime.strptime(gazp.queries[0][Query_Parameter.date_end], f'%d.%m.%Y'),
-                              Period.hour4)
+queries.multi_import_data(portfolios)
 s = time.time()
-print(s - f)
+print(s - g)
+# print(f'Importing data to files({len(portfolios)})...')
+# f = time.time()
+# for p in portfolios:
+    # fw.import_to_file(p)
+# s = time.time()
+# print(s - f)
 
 #----------------------------------------------------------------------------------------------------
 prices_main = fw.import_from_file('./DATA/' + portfolios[0].file_format() + '.txt')

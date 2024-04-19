@@ -1,4 +1,5 @@
 from io import StringIO
+from typing import List
 import urllib
 import string
 import urllib.parse
@@ -20,7 +21,8 @@ from . import query_classes
 
 from importlib import resources as impresources
 import templates
-
+import aiohttp
+import asyncio
 
 tm_to_code = {}
 markts = {}
@@ -56,10 +58,8 @@ def hour_to_hour4_str(content: str, sep: str) -> str:
 
 #------------------------------------------------------------------------------------------------------
 
-#HTTP Get export stocks
-def http_get_fin_data(market, code, ticker, from_date, to_date, period,
-    dtf=3, tmf=2, msor=1, sep=1, sep2=1, datf=1, at=1, fsp=1):
-
+def get_url(market, code, ticker, from_date, to_date, period,
+            dtf=3, tmf=2, msor=1, sep=1, sep2=1, datf=1, at=1, fsp=1):
     from_str = from_date.strftime("%d.%m.%Y")
     to_str = to_date.strftime("%d.%m.%Y")
 
@@ -96,13 +96,75 @@ def http_get_fin_data(market, code, ticker, from_date, to_date, period,
 
     url = ('http://export.finam.ru/{}.txt?'.format(ticker)
         + urllib.parse.urlencode(params))
-    #print(url)
+    return url
+
+
+#HTTP Get export stocks
+def http_get_fin_data(market, code, ticker, from_date, to_date, period,
+    dtf=3, tmf=2, msor=1, sep=1, sep2=1, datf=1, at=1, fsp=1):
+    url = get_url(market, code, ticker, from_date, to_date, period,
+                    dtf, tmf, msor, sep, sep2, datf, at, fsp)
+    
     response = urllib.request.urlopen(url)
     content = str(response.read(), 'utf-8')
-
     if(period == query_classes.Period.hour4):
         content = hour_to_hour4_str(content, ',')
     return content.split('\n')
+
+async def fetch_SimpleQueries(url, session, simple_query: query_classes.SimpleQuery):
+    async with session.get(url, ssl=False) as response:
+        data = await response.text()
+        if(simple_query.queries[0][query_classes.Query_Parameter.period] == query_classes.Period.hour4):
+            data = hour_to_hour4_str(data, ',')
+        return [data.split('\n'), simple_query]
+    
+async def fetch_all(urls, list_Simplequeries: List[query_classes.SimpleQuery]):
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_SimpleQueries(urls[i], session, list_Simplequeries[i])
+                 for i in range(len(urls))]
+        results = await asyncio.gather(*tasks)
+        return results
+
+def multi_import_data(list_Simplequeries: List[query_classes.SimpleQuery]):
+    urls = []
+    simple_queries = []
+    for index in range(len(list_Simplequeries)):
+        queries = list_Simplequeries[index].get_queries_list()
+        for j in range(len(queries)):
+            ticker = queries[j][query_classes.Query_Parameter.code]
+            market = queries[j][query_classes.Query_Parameter.market]
+            code = define_emitent_code(ticker, market)
+
+            #print(len(data[i][Query_Parameter.date_begin]))
+            from_date = dt.strptime(queries[j][query_classes.Query_Parameter.date_begin], f"%d.%m.%Y").date()
+            to_date = dt.strptime(queries[j][query_classes.Query_Parameter.date_end], f"%d.%m.%Y").date()
+            #print(ticker, market, code)
+            url = get_url(market, code, ticker, from_date, to_date, queries[j][query_classes.Query_Parameter.period])
+            urls.append(url)
+            simple_queries.append(list_Simplequeries[index])
+    results = asyncio.run(fetch_all(urls, simple_queries))
+    last_query = results[0][1]
+    ind = 0
+
+    while(ind < len(results)):
+        res_data = []
+        dat_list = [results[i][0] for i in range(ind, ind + len(last_query.queries))]
+        for j in range(len(last_query.queries)):
+            if(j != 0):
+                res_data += dat_list[j][1:]
+            else:
+                res_data += dat_list[j]
+            res_data[len(res_data) - 1] += '\r'
+        filename = last_query.file_format()
+        full_path = last_query.queries[0][query_classes.Query_Parameter.path] + filename + '.txt'
+        print('Loaded: ', full_path)
+        with open(full_path, 'w') as f:
+            for item in res_data:
+                f.write("{}".format(item))
+        ind += len(last_query.queries)
+        if(ind >= len(results)):
+            break
+        last_query = results[ind][1]
 
 #HTTP Get export base info
 def http_get_finam_info():
@@ -192,3 +254,6 @@ def define_market_emitents(market):
         http_get_finam_info()
 
     return (market, sorted(emitents[market]))
+
+#--------------------------------------------------------------------------------------------------------
+
