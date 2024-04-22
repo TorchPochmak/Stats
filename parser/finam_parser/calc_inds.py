@@ -19,18 +19,19 @@ download_path = './DATA/'
 mkpath(download_path)
 print('Files will be in ' + download_path)
 
+
 # portfolios = [
-#     # SimpleQuery('1', 'NLMK', '13.02.2023', '13.02.2023', Period.tick, download_path), 
-#     # SimpleQuery('1', 'NLMK', '13.02.2023', '13.02.2023', Period.min1, download_path), 
-#     # SimpleQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.min5, download_path), 
-#     # SimpleQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.min10, download_path), 
-#     # SimpleQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.min15, download_path), 
-#     # SimpleQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.min30, download_path), 
-#     # SimpleQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.hour, download_path), 
-#     #SimpleQuery('1', 'NLMK', '13.02.2022', '13.02.2023', Period.day, download_path), 
-#     queries.SimpleQuery('1', 'GAZP', '15.03.2023', '15.05.2023', queries.Period.hour4, download_path),
-#     queries.SimpleQuery('1', 'GAZP', '15.05.2022', '15.05.2023', queries.Period.day, download_path),
-#     #SimpleQuery('1', 'TCSG', '13.02.2022', '13.02.2023', Period.month, download_path),
+#     # FinamQuery('1', 'NLMK', '13.02.2023', '13.02.2023', Period.tick, download_path), 
+#     # FinamQuery('1', 'NLMK', '13.02.2023', '13.02.2023', Period.min1, download_path), 
+#     # FinamQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.min5, download_path), 
+#     # FinamQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.min10, download_path), 
+#     # FinamQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.min15, download_path), 
+#     # FinamQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.min30, download_path), 
+#     # FinamQuery('1', 'NLMK', '13.02.2023', '14.02.2023', Period.hour, download_path), 
+#     #FinamQuery('1', 'NLMK', '13.02.2022', '13.02.2023', Period.day, download_path), 
+#     queries.FinamQuery('1', 'GAZP', '15.03.2023', '15.05.2023', queries.Period.hour4, download_path),
+#     queries.FinamQuery('1', 'GAZP', '15.05.2022', '15.05.2023', queries.Period.day, download_path),
+#     #FinamQuery('1', 'TCSG', '13.02.2022', '13.02.2023', Period.month, download_path),
 # ]
 
 

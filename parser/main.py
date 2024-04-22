@@ -39,27 +39,31 @@ download_path = './DATA/'
 mkpath(download_path)
 print('Files will be in ' + download_path)
 #----------------------------------------------------------------------------------------------------
-gazp = SimpleQuery('1', 'GAZP', '1.05.2023', '15.05.2023', Period.hour4, download_path)
+gazp = FinamQuery('1', 'GAZP', '2023-05-10', '2023-05-15', Period.day, download_path)
+sber = FinamQuery('1', 'SBER', '2023-05-10', '2023-05-15', Period.day, download_path)
+
+gazp2 = MoexQuery("GAZP", '2023-05-10', '2023-05-15', Period.day, download_path)
+sber2 = MoexQuery('SBER', '2023-05-10', '2023-05-15', Period.day, download_path)
+
 g = time.time()
+
 portfolios2 = [
-    SimpleQuery('1', 'GAZP', '1.05.2023', '15.05.2023', Period.hour4, download_path),
-    SimpleQuery('1', 'TCSG', '1.05.2023', '15.05.2023', Period.day, download_path),
-    SimpleQuery('1', 'TCSG', '1.05.2023', '15.05.2023', Period.hour, download_path),
-    SimpleQuery('1', 'LKOH', '1.05.2023', '15.05.2023', Period.hour, download_path),
+    gazp, 
+    sber
 ]
-portfolios = portfolios2 * 1000
+
+portfolios = [
+    gazp2,
+    sber2
+]
+
 #----------------------------------------------------------------------------------------------------
-
-queries.multi_import_data(portfolios)
+dfs = MoexQuery.multi_export_to_df(portfolios)
+df =  MoexQuery.create_higher_TF_query('./DATA/' + portfolios[0].file_format() + '.txt')
+print(df.head())
+for element in dfs:
+    print(element.head())
 s = time.time()
-print(s - g)
-# print(f'Importing data to files({len(portfolios)})...')
-# f = time.time()
-# for p in portfolios:
-    # fw.import_to_file(p)
-# s = time.time()
-# print(s - f)
-
 #----------------------------------------------------------------------------------------------------
 prices_main = fw.import_from_file('./DATA/' + portfolios[0].file_format() + '.txt')
 prices_second = fw.import_from_file('./DATA/' + portfolios[1].file_format() + '.txt')

@@ -27,9 +27,9 @@ mkpath(download_path)
 print('Files will be in ' + download_path)
 #----------------------------------------------------------------------------------------------------
 portfolios = [
-    SimpleQuery('undefined', 'XBTUSD', '15.03.2019', '15.05.2023', Period.day, download_path),
-    SimpleQuery('undefined', 'ETHUSDT', '15.03.2019', '15.05.2023', Period.day, download_path),
-    SimpleQuery('undefined', 'VKCO', '15.03.2021', '15.05.2023', Period.min10, download_path),
+    FinamQuery('undefined', 'XBTUSD', '15.03.2019', '15.05.2023', Period.day, download_path),
+    FinamQuery('undefined', 'ETHUSDT', '15.03.2019', '15.05.2023', Period.day, download_path),
+    FinamQuery('undefined', 'VKCO', '15.03.2021', '15.05.2023', Period.min10, download_path),
 ]
 #----------------------------------------------------------------------------------------------------
 print(f'Importing data to files({len(portfolios)})...')
