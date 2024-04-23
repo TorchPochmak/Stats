@@ -59,10 +59,14 @@ portfolios = [
 
 #----------------------------------------------------------------------------------------------------
 dfs = MoexQuery.multi_export_to_df(portfolios)
-df =  MoexQuery.create_higher_TF_query('./DATA/' + portfolios[0].file_format() + '.txt')
+df =  MoexQuery.multi_export_to_df([gazp2.create_higher_TF_query()])[0]
+
+df2 = FinamQuery.multi_export_to_df(portfolios2)
 print(df.head())
 for element in dfs:
     print(element.head())
+for elem in df2:
+    print(elem.head())
 s = time.time()
 #----------------------------------------------------------------------------------------------------
 prices_main = fw.import_from_file('./DATA/' + portfolios[0].file_format() + '.txt')

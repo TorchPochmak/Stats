@@ -47,6 +47,20 @@ class Query_Parameter(IntEnum):
 class Query_Type(IntEnum):
     FinamQuery, MoexQuery = range(0,2)
 
+DICT_PERIOD_NAMES = {
+    Period.tick :   '0',#!didn't analyze lol
+    Period.min1 :   '1', 
+    Period.min5 :   '5',
+    Period.min10 :  '10', 
+    Period.min15 :  '15',
+    Period.min30 :  '30',
+    Period.hour :   '60',
+    Period.hour4 :  '240', 
+    Period.day :    'D', 
+    Period.week :   'W', 
+    Period.month:   'M',
+}
+    
 
 DICT_HIGHER_TIMEFRAME = {
     Period.tick :   [Period.min1, 5.],#!didn't analyze lol
@@ -120,6 +134,12 @@ def hour_to_hour4_str(content: str, sep: str) -> str:
         i += plus
     return result
 
+def swap_columns (df, col1, col2):
+    col_list = list(df.columns )
+    x, y = col_list. index (col1), col_list. index (col2)
+    col_list[y], col_list[x] = col_list[x], col_list[y]
+    df = df[col_list]
+    return df
 class Query(ABC):
 
     @staticmethod
@@ -256,8 +276,8 @@ class FinamQuery(Query):
                 code = http_queries.define_emitent_code(ticker, market)
 
                 #print(len(data[i][Query_Parameter.date_begin]))
-                from_date = dt.strptime(queries[j][query_classes.Query_Parameter.date_begin], f"%d.%m.%Y").date()
-                to_date = dt.strptime(queries[j][query_classes.Query_Parameter.date_end], f"%d.%m.%Y").date()
+                from_date = dt.strptime(queries[j][query_classes.Query_Parameter.date_begin], f"%Y-%m-%d").date()
+                to_date = dt.strptime(queries[j][query_classes.Query_Parameter.date_end], f"%Y-%m-%d").date()
                 #print(ticker, market, code)
                 url = FinamQuery.get_url(market, code, ticker, from_date, to_date, queries[j][query_classes.Query_Parameter.period])
                 urls.append(url)
@@ -321,7 +341,7 @@ class FinamQuery(Query):
         end_date_str = datetime.strftime(end_date, format=date_format)
         return FinamQuery(self.queries[0][Query_Parameter.market],
                            self.queries[0][Query_Parameter.code],
-                           start_date_str, end_date_str, self.queries[0][Query_Parameter.period],
+                           start_date_str, end_date_str, check[0],
                            self.queries[0][Query_Parameter.path])
     #List[query_classes.FinamQuery]
     @staticmethod
@@ -348,6 +368,17 @@ class MoexQuery():
         self.path = path
         self.interval = self.define_moex_interval(period)
 
+    def normalize_df(self, frame: pd.DataFrame) -> pd.DataFrame:
+        frame.insert(0, COL_NAMES.ticker, self.code)
+        frame.insert(1, COL_NAMES.per, None)
+        frame[COL_NAMES.ticker].apply(lambda x: DICT_PERIOD_NAMES[self.period])
+        frame.insert(2, COL_NAMES.date, None)
+        frame[COL_NAMES.date] = frame['begin']
+        frame[COL_NAMES.date].apply(lambda x: x[8:10] + x[5:7] + x[2:4])
+        frame[COL_NAMES.time] = frame['begin']
+        frame[COL_NAMES.time].apply(lambda x: x[11:13] + x[14:16])
+        swap_columns(frame, COL_NAMES.close, 'value')
+
     def define_moex_interval(self, period: Period) -> int:
         if(period == Period.min1):
             return 1
@@ -372,7 +403,6 @@ class MoexQuery():
                                                     start=query.date_begin, 
                                                     end=query.date_end)
             data = pd.DataFrame(data)
-            print(data.head())
             return data
 
     @staticmethod
@@ -387,12 +417,11 @@ class MoexQuery():
     def multi_export_to_df(list_queries) -> List[pd.DataFrame]:
         results = asyncio.run(MoexQuery.fetch_all(list_queries))
         print(results)
+        return results
 
     @staticmethod
     def multi_export_to_file(list_queries) -> None:
         raise SyntaxError
-
-    
 
     def file_format(self) -> str:
         filename = 'stocks_{}_{}_{}_{}'.format(self.code,
@@ -402,12 +431,14 @@ class MoexQuery():
         return filename
 
     def create_higher_TF_query(self): #same subtype as self
+        # print(check)
+        print(type(self))
         check = DICT_HIGHER_TIMEFRAME[self.period]
         percent = 1. / check[1]
         start = self.date_begin
         end = self.date_end
         # Данные
-        date_format = f"%d.%m.%Y"
+        date_format = f"%Y-%m-%d"
 
         start_date = datetime.strptime(start, date_format)
         end_date = datetime.strptime(end, date_format)
@@ -421,9 +452,15 @@ class MoexQuery():
         start_date_str = datetime.strftime(true_start_date, format=date_format)
         end_date_str = datetime.strftime(end_date, format=date_format)
         return MoexQuery(self.code,
-                        start_date_str, end_date_str, self.period,
+                        start_date_str, end_date_str, check[0],
                         self.path)
     
+
+
+
+
+
+
 
 
 
