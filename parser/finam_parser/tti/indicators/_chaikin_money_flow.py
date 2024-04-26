@@ -100,7 +100,7 @@ class ChaikinMoneyFlow(TechnicalIndicator):
             window=self._period, min_periods=self._period, center=False,
             win_type=None, on=None, axis=0, closed=None).sum()
 
-        cmf['cmf'] = (cmf['numerator'] / cmf['denominator']).round(4)
+        cmf['cmf'] = (cmf['numerator'] / cmf['denominator']).round(8)
 
         return cmf[['cmf']]
 

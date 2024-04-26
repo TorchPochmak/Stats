@@ -106,7 +106,7 @@ class VerticalHorizontalFilter(TechnicalIndicator):
 
         vhf['vhf'] = vhf['hc_lc_diff'] / vhf['close_change_sum']
 
-        return vhf[['vhf']].round(4)
+        return vhf[['vhf']].round(8)
 
     def getTiSignal(self):
         """

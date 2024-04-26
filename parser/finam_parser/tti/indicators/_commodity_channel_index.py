@@ -103,7 +103,7 @@ class CommodityChannelIndex(TechnicalIndicator):
         cci['cci'] = \
             (typical_price - tp_sma) / (0.015 * differences / self._period)
 
-        return cci.round(4)
+        return cci.round(8)
 
     def getTiSignal(self):
         """

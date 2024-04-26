@@ -90,7 +90,7 @@ class MassIndex(TechnicalIndicator):
             window=25, min_periods=25, center=False,
             win_type=None, on=None, axis=0, closed=None).sum()
 
-        return mi.round(4)
+        return mi.round(8)
 
     def getTiSignal(self):
         """

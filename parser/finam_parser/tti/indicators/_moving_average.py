@@ -171,7 +171,7 @@ class MovingAverage(TechnicalIndicator):
                     1 - (sm * vr.iat[i, 0])
                 ) * ma['ma-' + self._ma_type].iat[i-1]
 
-        return ma.round(4)
+        return ma.round(8)
 
     def getTiSignal(self):
         """

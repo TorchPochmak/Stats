@@ -159,7 +159,7 @@ class StochasticMomentumIndex(TechnicalIndicator):
         smi['smi'] = 100 * (smi['distance_double_ema'] / (
                 0.5 * smi['hh_ll_diff_double_ema']))
 
-        return smi[['smi']].round(4)
+        return smi[['smi']].round(8)
 
     def getTiSignal(self):
         """

@@ -100,7 +100,7 @@ class EaseOfMovement(TechnicalIndicator):
             window=self._period, min_periods=self._period, center=False,
             win_type=None, on=None, axis=0, closed=None).mean()
 
-        return emv.round(4)
+        return emv.round(8)
 
     def getTiSignal(self):
         """

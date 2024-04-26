@@ -84,7 +84,7 @@ class PositiveVolumeIndex(TechnicalIndicator):
             else:
                 pvi['pvi'].iat[i] = pvi['pvi'].iat[i - 1]
 
-        return pvi.round(4)
+        return pvi.round(8)
 
     def getTiSignal(self):
         """

@@ -103,7 +103,7 @@ class IntradayMovementIndex(TechnicalIndicator):
 
         imi['imi'] = 100 * upc_sum / (upc_sum + dpc_sum)
 
-        return imi.round(4)
+        return imi.round(8)
 
     def getTiSignal(self):
         """

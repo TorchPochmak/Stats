@@ -84,7 +84,7 @@ class NegativeVolumeIndex(TechnicalIndicator):
             else:
                 nvi['nvi'].iat[i] = nvi['nvi'].iat[i - 1]
 
-        return nvi.round(4)
+        return nvi.round(8)
 
     def getTiSignal(self):
         """

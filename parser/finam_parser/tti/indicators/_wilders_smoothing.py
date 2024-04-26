@@ -92,7 +92,7 @@ class WildersSmoothing(TechnicalIndicator):
                     self._input_data['close'].iat[i] - ws['ws'].iat[i - 1]
             ) / self._period
 
-        return ws.round(4)
+        return ws.round(8)
 
     def getTiSignal(self):
         """

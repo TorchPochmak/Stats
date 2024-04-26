@@ -95,7 +95,7 @@ class KlingerOscillator(TechnicalIndicator):
             span=55, min_periods=55, adjust=False, axis=0
         ).mean()
 
-        return ko.round(4)
+        return ko.round(8)
 
     def getTiSignal(self):
         """

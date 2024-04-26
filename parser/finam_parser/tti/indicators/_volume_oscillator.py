@@ -109,7 +109,7 @@ class VolumeOscillator(TechnicalIndicator):
             window=self._long_period, min_periods=self._long_period,
             center=False, win_type=None, on=None, axis=0, closed=None).mean()
 
-        return vosc.round(4)
+        return vosc.round(8)
 
     def getTiSignal(self):
         """

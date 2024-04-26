@@ -85,7 +85,7 @@ class MedianPrice(TechnicalIndicator):
             data=0.5 * (self._input_data['high'] + self._input_data['low']),
             dtype='float64')
 
-        return mp.round(4)
+        return mp.round(8)
 
     def getTiSignal(self):
         """

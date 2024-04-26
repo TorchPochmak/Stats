@@ -84,7 +84,7 @@ class ParabolicSAR(TechnicalIndicator):
                 current_index=i, position_start_index=position_start_index,
                 previous_sar=sar.values[i-1, :], position_changed=False)
 
-        return sar[['sar']].astype(dtype='float64').round(4)
+        return sar[['sar']].astype(dtype='float64').round(8)
 
     def _calculateSarRow(self, current_index, position_start_index,
                          previous_sar=None, position_changed=False):

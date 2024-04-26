@@ -106,7 +106,7 @@ class Envelopes(TechnicalIndicator):
         env['upper_band'] = (1 + self._shift) * ma
         env['lower_band'] = (1 - self._shift) * ma
 
-        return env.round(4)
+        return env.round(8)
 
     def getTiSignal(self):
         """

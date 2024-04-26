@@ -102,7 +102,7 @@ class ProjectionOscillator(TechnicalIndicator):
         posc['trigger_line'] = posc['posc'] .ewm(
             span=3, min_periods=3, adjust=False, axis=0).mean()
 
-        return posc.round(4)
+        return posc.round(8)
 
     def getTiSignal(self):
         """

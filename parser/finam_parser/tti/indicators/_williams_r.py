@@ -96,7 +96,7 @@ class WilliamsR(TechnicalIndicator):
         wr['wr'] = -100 * ((wr['highest_high'] - self._input_data['close']) /
                            (wr['highest_high'] - wr['lowest_low']))
 
-        return wr[['wr']].round(4)
+        return wr[['wr']].round(8)
 
     def getTiSignal(self):
         """

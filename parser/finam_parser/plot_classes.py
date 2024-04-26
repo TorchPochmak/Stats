@@ -94,8 +94,6 @@ class Line(Shape):
         self.column_x = new_x
         self.column_y = new_y
 
-
-
     def draw(self, prices: pd.DataFrame):
         plt.plot(prices[self.column_x], prices[self.column_y], 
                  self.format, linewidth=self.linewidth, color=self.color)
@@ -148,7 +146,7 @@ class Rect():
         print(type(ax))
         ax.add_patch(rect)
 
-    
+
 class MainFigure():
     def __init__(self, bg_color: str = '#090625', ticks_color: str = 'white', grid_color: str = 'gray',
 
@@ -204,7 +202,6 @@ class MainFigure():
             plt.yticks(np.arange(y_min_int, y_max_int, y_max_int / count_y), fontsize = 7)
         shape.draw(frame)
         return fg_ax
-
 
 #INCLUSIVE
 def get_gs_part(gs: matplotlib.gridspec.GridSpec,

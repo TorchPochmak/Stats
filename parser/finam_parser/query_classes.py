@@ -4,7 +4,6 @@ import urllib
 import string
 import urllib.parse
 import urllib.request, time
-import string
 from datetime import datetime as dt, timedelta as td
 from distutils.dir_util import mkpath
 import gzip
@@ -14,22 +13,9 @@ import aiomoex
 import pandas as pd
 from io import StringIO
 from typing import List
-import urllib
-import string
-import urllib.parse
-import urllib.request, time
 import requests
 import string
-from datetime import datetime as dt, timedelta as td
-from distutils.dir_util import mkpath
-import gzip
-from datetime import datetime, timedelta
-from enum import IntEnum
-import pandas as pd
 import numpy as np
-
-from importlib import resources as impresources
-import templates
 
 from . import query_classes
 from . import http_queries
@@ -108,6 +94,7 @@ def correct_date_iso_series(frame: pd.DataFrame):
 
 def hour_to_hour4_str(content: str, sep: str) -> str:
     content = content[:len(content) - 1]
+    print(content)
     lst = content.split('\n')
     for i in range(0, len(lst)):
         lst[i] = lst[i].split(sep)
@@ -115,6 +102,7 @@ def hour_to_hour4_str(content: str, sep: str) -> str:
     result = ''
     result += sep.join(columns)
     #<TICKER>,<PER>,<DATE>,<TIME>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<VOL>
+    #ticker, per, date, time, open, high, low, close, vol
     i = 1
     while(i < len(lst)):
         result += '\r\n'
@@ -134,8 +122,27 @@ def hour_to_hour4_str(content: str, sep: str) -> str:
         i += plus
     return result
 
+def hour_to_hour4_frame(content: pd.DataFrame, sep: str) -> pd.DataFrame:
+    result = ''
+    for col in content.columns:
+        result += col + sep
+    result += '\n'
+    for index, element in content.iterrows():
+        for col in content.columns:
+            result += str(element[col]) + sep
+        result += '\n'
+    print(result)
+    result = hour_to_hour4_str(result, sep)
+    lst = result.split('\n')
+                
+    df = [x.split(',') for x in lst if x]
+    df = pd.DataFrame(df[1:], columns=COLUMNS[:-2])
+    df = df.astype(dtype={'ticker': str, 'per': str, 'date': str, 'time': str,
+                                        'open': float, 'high': float, 'low': float, 'close': float, 'vol': float})
+    return df
+
 def swap_columns (df, col1, col2):
-    col_list = list(df.columns )
+    col_list = list(df.columns)
     x, y = col_list. index (col1), col_list. index (col2)
     col_list[y], col_list[x] = col_list[x], col_list[y]
     df = df[col_list]
@@ -370,14 +377,18 @@ class MoexQuery():
 
     def normalize_df(self, frame: pd.DataFrame) -> pd.DataFrame:
         frame.insert(0, COL_NAMES.ticker, self.code)
-        frame.insert(1, COL_NAMES.per, None)
-        frame[COL_NAMES.ticker].apply(lambda x: DICT_PERIOD_NAMES[self.period])
+        frame.insert(1, COL_NAMES.per, DICT_PERIOD_NAMES[self.period])
         frame.insert(2, COL_NAMES.date, None)
+        frame.insert(3, COL_NAMES.time, None)
         frame[COL_NAMES.date] = frame['begin']
-        frame[COL_NAMES.date].apply(lambda x: x[8:10] + x[5:7] + x[2:4])
+        frame[COL_NAMES.date] = frame[COL_NAMES.date].apply(lambda x: x[8:10] + x[5:7] + x[2:4])
         frame[COL_NAMES.time] = frame['begin']
-        frame[COL_NAMES.time].apply(lambda x: x[11:13] + x[14:16])
-        swap_columns(frame, COL_NAMES.close, 'value')
+        frame[COL_NAMES.time] = frame[COL_NAMES.time].apply(lambda x: x[11:13] + x[14:16])
+
+
+        frame = swap_columns(frame, COL_NAMES.close, 'value')
+        frame = frame.drop(columns=['value', 'begin', 'end'])
+        return frame
 
     def define_moex_interval(self, period: Period) -> int:
         if(period == Period.min1):
@@ -399,10 +410,25 @@ class MoexQuery():
     @staticmethod
     async def fetch_MoexQuery(query):
         async with aiohttp.ClientSession() as session:
-            data = await aiomoex.get_market_candles(session, query.code, interval=query.interval, 
+            period = query.interval
+            if(period == 240):
+                period = 60
+            data = await aiomoex.get_market_candles(session, query.code, interval=period, 
                                                     start=query.date_begin, 
                                                     end=query.date_end)
             data = pd.DataFrame(data)
+            if(data.empty):
+                print("ERROR: dataframe is empty")
+                print("Code: " + str(query.code))
+                print("Period: " + str(query.period))
+                print("Start_date " + str(query.date_begin))
+                print("End_date " + str(query.date_end))
+                raise ValueError
+            #TODO NORMALIZE DF
+            data = query.normalize_df(data)
+            if(query.interval == 240):
+                data = hour_to_hour4_frame(data, ',')
+            data = Query.correct_frame(data)
             return data
 
     @staticmethod
@@ -416,12 +442,17 @@ class MoexQuery():
     @staticmethod
     def multi_export_to_df(list_queries) -> List[pd.DataFrame]:
         results = asyncio.run(MoexQuery.fetch_all(list_queries))
-        print(results)
         return results
 
     @staticmethod
+    # list_queries -> List[MoexQuery]
     def multi_export_to_file(list_queries) -> None:
-        raise SyntaxError
+        results = asyncio.run(MoexQuery.fetch_all(list_queries))
+        for i in range(len(list_queries)):
+            filename = list_queries[i].file_format()
+            full_path = list_queries[i].path + filename + '.txt'
+            print('Loaded: ', full_path)
+            results[i].to_csv(full_path, index=False)
 
     def file_format(self) -> str:
         filename = 'stocks_{}_{}_{}_{}'.format(self.code,

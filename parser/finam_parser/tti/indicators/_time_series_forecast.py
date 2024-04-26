@@ -93,7 +93,7 @@ class TimeSeriesForecast(TechnicalIndicator):
                                             period=self._period).getTiData()],
             axis=1).sum(axis=1).iloc[self._period-1:]
 
-        return tsf.round(4)
+        return tsf.round(8)
 
     def getTiSignal(self):
         """

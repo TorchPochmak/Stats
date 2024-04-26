@@ -112,7 +112,7 @@ class SwingIndex(TechnicalIndicator):
         swi.loc[swi['swi'] > 100.0, ['swi']] = 100.0
         swi.loc[swi['swi'] < -100.0, ['swi']] = -100.0
 
-        return swi[['swi']].round(4)
+        return swi[['swi']].round(8)
 
     def getTiSignal(self):
         """

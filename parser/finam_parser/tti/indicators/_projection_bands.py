@@ -117,7 +117,7 @@ class ProjectionBands(TechnicalIndicator):
                 [(j * low_slope[i]) + self._input_data['low'].values[i - j]
                  for j in range(1, self._period)])
 
-        return pbs.round(4)
+        return pbs.round(8)
 
     def getTiSignal(self):
         """

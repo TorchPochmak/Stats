@@ -111,7 +111,7 @@ class LinearRegressionSlope(TechnicalIndicator):
         lrs['lrs'] = \
             (self._period * xy - (x * y)) / ((self._period * xx) - (x * x))
 
-        return lrs.round(4)
+        return lrs.round(8)
 
     def getTiSignal(self):
         """

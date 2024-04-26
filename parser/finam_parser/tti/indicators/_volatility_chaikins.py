@@ -115,7 +115,7 @@ class VolatilityChaikins(TechnicalIndicator):
                             vch['high_low_diff_ema'].shift(self._change_period)
                             )
 
-        return vch[['vch']].round(4)
+        return vch[['vch']].round(8)
 
     def getTiSignal(self):
         """

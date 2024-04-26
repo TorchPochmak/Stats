@@ -92,7 +92,7 @@ class RelativeStrengthIndex(TechnicalIndicator):
             upc['upc'].values[i] = round(self._input_data['close'].values[i] -
                 self._input_data['close'].values[i - 1] if
                     self._input_data['close'].values[i] >
-                    self._input_data['close'].values[i - 1] else 0.0, 4)
+                    self._input_data['close'].values[i - 1] else 0.0, 8)
 
         upc['smoothed_upc'].iat[self._period] = \
             upc['upc'].iloc[:self._period + 1].mean()
@@ -101,7 +101,7 @@ class RelativeStrengthIndex(TechnicalIndicator):
             upc['smoothed_upc'].values[i] = round(
                 upc['smoothed_upc'].values[i - 1] +
                 (upc['upc'].values[i] - upc['smoothed_upc'].values[i - 1]
-                 ) / self._period, 4)
+                 ) / self._period, 8)
 
         # Calculate Downward Price Change
         dpc = pd.DataFrame(data=None, index=self._input_data.index,
@@ -112,7 +112,7 @@ class RelativeStrengthIndex(TechnicalIndicator):
                 self._input_data['close'].values[i - 1] -
                 self._input_data['close'].values[i] if
                 self._input_data['close'].values[i] <
-                self._input_data['close'].values[i - 1] else 0.0, 4)
+                self._input_data['close'].values[i - 1] else 0.0, 8)
 
         dpc['smoothed_dpc'].iat[self._period] = \
             dpc['dpc'].iloc[:self._period + 1].mean()
@@ -121,13 +121,13 @@ class RelativeStrengthIndex(TechnicalIndicator):
             dpc['smoothed_dpc'].values[i] = round(
                 dpc['smoothed_dpc'].values[i - 1] +
                 (dpc['dpc'].values[i] - dpc['smoothed_dpc'].values[i - 1]
-                 ) / self._period, 4)
+                 ) / self._period, 8)
 
         rsi['rsi'] = \
             100.0 - \
             (100.0 / ((upc['smoothed_upc'] / dpc['smoothed_dpc']) + 1.0))
 
-        return rsi.astype('float64').round(4)
+        return rsi.astype('float64').round(8)
 
     def getTiSignal(self):
         """

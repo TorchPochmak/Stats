@@ -103,7 +103,7 @@ class Performance(TechnicalIndicator):
 
         prf['target_' + self._mode] = self._target
 
-        return prf.round(4)
+        return prf.round(8)
 
     def getTiSignal(self):
         """

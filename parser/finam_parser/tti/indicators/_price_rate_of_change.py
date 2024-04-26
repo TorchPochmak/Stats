@@ -88,7 +88,7 @@ class PriceRateOfChange(TechnicalIndicator):
                 self._input_data['close'].shift(self._period)
         ) / self._input_data['close'].shift(self._period)
 
-        return prc.round(4)
+        return prc.round(8)
 
     def getTiSignal(self):
         """

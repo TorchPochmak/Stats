@@ -39,38 +39,34 @@ download_path = './DATA/'
 mkpath(download_path)
 print('Files will be in ' + download_path)
 #----------------------------------------------------------------------------------------------------
-gazp = FinamQuery('1', 'GAZP', '2023-05-10', '2023-05-15', Period.day, download_path)
-sber = FinamQuery('1', 'SBER', '2023-05-10', '2023-05-15', Period.day, download_path)
+gazp = FinamQuery('1', 'GAZP', '2023-04-10', '2023-05-15', Period.hour, download_path)
+sber = FinamQuery('1', 'SBER', '2023-04-10', '2023-05-15', Period.day, download_path)
+FinamQuery.multi_export_to_file([gazp,sber])
+lqdt = MoexQuery("LQDT", '2023-01-10', '2023-05-15', Period.hour4, download_path)
+sber2 = MoexQuery('SBER', '2023-01-10', '2023-05-15', Period.day, download_path)
 
-gazp2 = MoexQuery("GAZP", '2023-05-10', '2023-05-15', Period.day, download_path)
-sber2 = MoexQuery('SBER', '2023-05-10', '2023-05-15', Period.day, download_path)
-
-g = time.time()
 
 portfolios2 = [
     gazp, 
     sber
 ]
 
-portfolios = [
-    gazp2,
-    sber2
-]
-
+# portfolios = [
+#     gazp2,
+#     gazp2.create_higher_TF_query()
+# ]
+# MoexQuery.multi_export_to_file(portfolios)
 #----------------------------------------------------------------------------------------------------
-dfs = MoexQuery.multi_export_to_df(portfolios)
-df =  MoexQuery.multi_export_to_df([gazp2.create_higher_TF_query()])[0]
-
-df2 = FinamQuery.multi_export_to_df(portfolios2)
-print(df.head())
-for element in dfs:
-    print(element.head())
-for elem in df2:
-    print(elem.head())
-s = time.time()
+# dfs = MoexQuery.multi_export_to_file(portfolios)
 #----------------------------------------------------------------------------------------------------
-prices_main = fw.import_from_file('./DATA/' + portfolios[0].file_format() + '.txt')
-prices_second = fw.import_from_file('./DATA/' + portfolios[1].file_format() + '.txt')
+
+# prices_main = Query.import_from_file('./DATA/' + portfolios[0].file_format() + '.txt')
+# prices_second = Query.import_from_file('./DATA/' + portfolios[1].file_format() + '.txt')
+
+prices = MoexQuery.multi_export_to_df([lqdt, lqdt.create_higher_TF_query()])
+prices_main = prices[0]
+prices_second = prices[1]
+print(prices_main.head())
 
 main_figure = MainFigure()
 shape_candle = Candle()

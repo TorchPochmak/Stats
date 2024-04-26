@@ -122,7 +122,7 @@ class UltimateOscillator(TechnicalIndicator):
                 (2 * uosc['14_bus_rs_division']) + uosc['28_bus_rs_division']
         ) / 7
 
-        return uosc[['uosc']].round(4)
+        return uosc[['uosc']].round(8)
 
     def getTiSignal(self):
         """

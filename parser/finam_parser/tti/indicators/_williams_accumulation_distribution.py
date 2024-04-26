@@ -79,7 +79,7 @@ class WilliamsAccumulationDistribution(TechnicalIndicator):
 
         wad['wad'][wad['wad'] < 0] = self._input_data['close'] - wad['trh']
 
-        return wad[['wad']].round(4)
+        return wad[['wad']].round(8)
 
     def getTiSignal(self):
         """

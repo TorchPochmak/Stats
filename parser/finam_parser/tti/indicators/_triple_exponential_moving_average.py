@@ -100,7 +100,7 @@ class TripleExponentialMovingAverage(TechnicalIndicator):
 
         tema['tema'] = (3 * ema) - (3 * double_ema) + triple_ema
 
-        return tema.round(4)
+        return tema.round(8)
 
     def getTiSignal(self):
         """

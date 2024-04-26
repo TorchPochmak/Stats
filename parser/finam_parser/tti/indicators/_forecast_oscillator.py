@@ -90,7 +90,7 @@ class ForecastOscillator(TechnicalIndicator):
             period=self._period
         ).getTiData()['tsf'].shift(1)) / self._input_data['close']
 
-        return fosc.round(4)
+        return fosc.round(8)
 
     def getTiSignal(self):
         """

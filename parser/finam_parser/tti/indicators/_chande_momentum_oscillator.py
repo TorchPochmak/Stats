@@ -103,7 +103,7 @@ class ChandeMomentumOscillator(TechnicalIndicator):
         cmo['cmo'] = 100 * (up_move_changes - down_move_changes) / \
                            (up_move_changes + down_move_changes)
 
-        return cmo.round(4)
+        return cmo.round(8)
 
     def getTiSignal(self):
         """

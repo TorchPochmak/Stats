@@ -136,7 +136,7 @@ class RelativeMomentumIndex(TechnicalIndicator):
         rmi['rmi'] = 100 * (rmi['smoothed_upc'] / rmi['smoothed_dpc']) / (
                 1 + rmi['smoothed_upc'] / rmi['smoothed_dpc'])
 
-        return rmi[['rmi']].round(4)
+        return rmi[['rmi']].round(8)
 
     def getTiSignal(self):
         """

@@ -76,7 +76,7 @@ class ChaikinOscillator(TechnicalIndicator):
             adl.ewm(span=3, min_periods=3, adjust=False, axis=0).mean() - \
             adl.ewm(span=10, min_periods=10, adjust=False, axis=0).mean()
 
-        return co.round(4)
+        return co.round(8)
 
     def getTiSignal(self):
         """

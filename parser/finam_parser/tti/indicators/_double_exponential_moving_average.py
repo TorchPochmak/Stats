@@ -95,7 +95,7 @@ class DoubleExponentialMovingAverage(TechnicalIndicator):
 
         dema['dema'] = (2 * ema) - ema_of_ema
 
-        return dema.round(4)
+        return dema.round(8)
 
     def getTiSignal(self):
         """

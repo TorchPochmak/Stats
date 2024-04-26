@@ -88,7 +88,7 @@ class VolumeRateOfChange(TechnicalIndicator):
                 self._input_data['volume'].shift(self._period)
                             ) / self._input_data['volume'].shift(self._period))
 
-        return vrc.round(4)
+        return vrc.round(8)
 
     def getTiSignal(self):
         """

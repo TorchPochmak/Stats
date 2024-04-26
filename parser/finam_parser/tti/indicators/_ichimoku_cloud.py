@@ -83,7 +83,7 @@ class IchimokuCloud(TechnicalIndicator):
                            rolling(window=52, min_periods=1).min()) / 2).\
             shift(26)
 
-        return ic.round(4)
+        return ic.round(8)
 
     @staticmethod
     def _whereInCloud(value, cloud):

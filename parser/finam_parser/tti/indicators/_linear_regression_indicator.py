@@ -97,7 +97,7 @@ class LinearRegressionIndicator(TechnicalIndicator):
 
         for i in range(len(self._input_data.index)):
             lri['lri'].values[i] = round(
-                rolling_ols.params[i][0] + i * rolling_ols.params[i][1], 4)
+                rolling_ols.params[i][0] + i * rolling_ols.params[i][1], 8)
 
         return lri
 

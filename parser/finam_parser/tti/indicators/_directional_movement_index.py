@@ -151,7 +151,7 @@ class DirectionalMovementIndex(TechnicalIndicator):
         dmi = dmi[['+di14', '-di14', 'dx', 'adx', 'adxr']]
         dmi.columns = ['+di', '-di', 'dx', 'adx', 'adxr']
 
-        return dmi.round(4)
+        return dmi.round(8)
 
     def getTiSignal(self):
         """

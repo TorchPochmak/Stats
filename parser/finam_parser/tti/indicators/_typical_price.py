@@ -76,7 +76,7 @@ class TypicalPrice(TechnicalIndicator):
         tp = pd.DataFrame(index=self._input_data.index, columns=['tp'],
                           data=self._input_data.mean(axis=1), dtype='float64')
 
-        return tp.round(4)
+        return tp.round(8)
 
     def getTiSignal(self):
         """

@@ -86,7 +86,7 @@ class AverageTrueRange(TechnicalIndicator):
         atr['atr'] = pd.Series(
             data=[atr['atr'].iloc[:14].mean()], index=[atr.index[13]]
         ).append(atr['atr'].iloc[14:]).ewm(alpha=1 / 14,
-                                           adjust=False,).mean().round(4)
+                                           adjust=False,).mean().round(8)
 
         return atr[['atr']]
 

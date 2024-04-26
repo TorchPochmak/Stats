@@ -79,7 +79,7 @@ class PriceAndVolumeTrend(TechnicalIndicator):
                     self._input_data['volume'].iat[i] /
                     self._input_data['close'].iat[i - 1])
 
-        return pvt.round(4)
+        return pvt.round(8)
 
     def getTiSignal(self):
         """

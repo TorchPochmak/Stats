@@ -70,16 +70,16 @@ class MovingAverageConvergenceDivergence(TechnicalIndicator):
 
         # Calculate Exponential Moving Average for 26 periods
         ema_26 = self._input_data.ewm(span=26, min_periods=26, adjust=False,
-                                      axis=0).mean().round(4)
+                                      axis=0).mean().round(8)
 
         # Calculate Exponential Moving Average for 12 periods
         ema_12 = self._input_data.ewm(span=12, min_periods=12, adjust=False,
-                                      axis=0).mean().round(4)
+                                      axis=0).mean().round(8)
 
         # Calculate MACD
         macd = ema_12 - ema_26
         macd = pd.concat([macd, macd.ewm(span=9, min_periods=9, adjust=False,
-                                         axis=0).mean()], axis=1).round(4)
+                                         axis=0).mean()], axis=1).round(8)
 
         macd.columns = ['macd', 'signal_line']
 

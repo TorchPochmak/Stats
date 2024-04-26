@@ -143,7 +143,7 @@ class RangeIndicator(TechnicalIndicator):
             span=self._smoothing_period, min_periods=self._smoothing_period,
             adjust=False, axis=0).mean()
 
-        return ri[['ri']].round(4)
+        return ri[['ri']].round(8)
 
     def getTiSignal(self):
         """

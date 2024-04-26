@@ -63,7 +63,7 @@ class WeightedClose(TechnicalIndicator):
         wc['wc'] = (2 * self._input_data['close'] + self._input_data['high'] +
                     self._input_data['low']) / 4
 
-        return wc.round(4)
+        return wc.round(8)
 
     def getTiSignal(self):
         """

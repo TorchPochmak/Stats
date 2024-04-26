@@ -90,7 +90,7 @@ class Qstick(TechnicalIndicator):
                 win_type=None, on=None, axis=0, closed=None).sum(
             ) / self._period
 
-        return qstick.round(4)
+        return qstick.round(8)
 
     def getTiSignal(self):
         """

@@ -157,7 +157,7 @@ class RelativeVolatilityIndex(TechnicalIndicator):
         # Calculate indicator
         rvi['rvi'] = (rvi['rvih'] + rvi['rvil']) / 2
 
-        return rvi[['rvi']].round(4)
+        return rvi[['rvi']].round(8)
 
     def getTiSignal(self):
         """

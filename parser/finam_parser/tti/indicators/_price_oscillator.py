@@ -111,7 +111,7 @@ class PriceOscillator(TechnicalIndicator):
 
         posc.columns = ['posc']
 
-        return posc.round(4)
+        return posc.round(8)
 
     def getTiSignal(self):
         """

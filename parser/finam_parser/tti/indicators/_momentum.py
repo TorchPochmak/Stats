@@ -87,7 +87,7 @@ class Momentum(TechnicalIndicator):
             100. * self._input_data['close'].iloc[self._period:] / \
             self._input_data['close'].shift(self._period).iloc[self._period:]
 
-        return mom.round(4)
+        return mom.round(8)
 
     def getTiSignal(self):
         """

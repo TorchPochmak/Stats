@@ -93,7 +93,7 @@ class DetrendedPriceOscillator(TechnicalIndicator):
             self._input_data['close'] - \
             close_sma.shift(-1 - int(self._period / 2))
 
-        return dpo.iloc[:-1 - int(self._period / 2)].round(4)
+        return dpo.iloc[:-1 - int(self._period / 2)].round(8)
 
     def getTiSignal(self):
         """
