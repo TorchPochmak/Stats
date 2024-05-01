@@ -12,13 +12,6 @@ import numpy as np
 import pandas as pd
 #(center_y - 2ind_g )/ (count)
 
-mf = finam_parser.plot_classes.MainFigure()
-
-market = '1'
-download_path = './DATA/'
-mkpath(download_path)
-print('Files will be in ' + download_path)
-
 
 # portfolios = [
 #     # FinamQuery('1', 'NLMK', '13.02.2023', '13.02.2023', Period.tick, download_path), 

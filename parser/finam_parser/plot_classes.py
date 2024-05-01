@@ -64,7 +64,6 @@ class Candle(Shape):
             #only draws a line, no clue about scaling, titles and axes stuff...
             col1 = self.color_up
             col2 = self.color_down
-            print(len(prices))
             colors = [col1 if prices[self.bar_bottom][x] >= prices[self.bar_up][x] else col2 for x in range(len(prices))]
             plt.bar (prices[self.x_index], prices[self.error_bar_up] - prices[self.error_bar_bottom], 
                     self.width_min_max, bottom=prices[self.error_bar_bottom], color=colors, edgecolor=(0,0,0,0))
@@ -143,7 +142,6 @@ class Rect():
         
     #? А вдруг забуду, что там нужен add_patch, пусть будет 
     def draw_rect(self, ax: plt.Axes, rect: plt.Rectangle):
-        print(type(ax))
         ax.add_patch(rect)
 
 
@@ -160,12 +158,10 @@ class MainFigure():
         self.grid_color = grid_color
         self.ticks_color = ticks_color
         #endregion
-        plt.rcParams["figure.figsize"] = [self.size_y * 10, self.size_x * 10]
-        plt.rcParams["figure.autolayout"] = True
-    
-        fg = plt.figure(facecolor=bg_color)
-        self.fg = fg
-        self.grid_spec = fg.add_gridspec(size_y, size_x)
+        self.fg = plt.figure(facecolor=bg_color, figsize=[(float(size_x))/10., (float(size_y))/10.])
+        # plt.rcParams["figure.figsize"] = [(float(size_x))/10., (float(size_y))/10.]
+        # plt.rcParams["figure.autolayout"] = True
+        self.grid_spec = self.fg.add_gridspec(size_y, size_x)
         pass
     #TODO axis_y counter 
 
@@ -208,12 +204,12 @@ def get_gs_part(gs: matplotlib.gridspec.GridSpec,
                   begin_x: int = 0, end_x:int = 0,
                   begin_y: int = 0, end_y: int = 0):
     fig_width, fig_height = plt.gcf().get_size_inches()
-    fig_width = int(fig_width)
-    fig_height = int(fig_height)
+    fig_width = int(fig_width*10)
+    fig_height = int(fig_height*10)
     if(end_x == 0):
-        end_x = int(fig_height/10 - 1)
+        end_x = int(fig_width - 1)
     if(end_y == 0):
-        end_y = int(fig_width/10 - 1)
+        end_y = int(fig_height - 1)
     begin_x = int(begin_x)
     begin_y = int(begin_y)
     end_x = int(end_x)

@@ -29,8 +29,8 @@ def fillMissingValues(input_data):
         data = input_data.sort_index(ascending=True)
     
         # First fill forward and the backward (order matters)
-        data.fillna(method='ffill', inplace=True)
-        data.fillna(method='bfill', inplace=True)
+        data.ffill(inplace=True)
+        data.bfill(inplace=True)
 
     else:
         raise TypeError('Invalid input_data type. It was expected ' +

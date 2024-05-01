@@ -162,7 +162,7 @@ class StochasticOscillator(TechnicalIndicator):
             so.rolling(window=self._d_periods, min_periods=self._d_periods,
                        center=False,
                        win_type=None if self._d_method == 'simple' else
-                       self._d_method, on=None, axis=0, closed=None).
+                       self._d_method, on=None, closed=None).
             mean().round(8)], axis=1)
 
         so.columns = ['%K', '%D']

@@ -94,7 +94,6 @@ def correct_date_iso_series(frame: pd.DataFrame):
 
 def hour_to_hour4_str(content: str, sep: str) -> str:
     content = content[:len(content) - 1]
-    print(content)
     lst = content.split('\n')
     for i in range(0, len(lst)):
         lst[i] = lst[i].split(sep)
@@ -131,7 +130,6 @@ def hour_to_hour4_frame(content: pd.DataFrame, sep: str) -> pd.DataFrame:
         for col in content.columns:
             result += str(element[col]) + sep
         result += '\n'
-    print(result)
     result = hour_to_hour4_str(result, sep)
     lst = result.split('\n')
                 
@@ -271,7 +269,7 @@ class FinamQuery(Query):
             return results
 
     @staticmethod
-    def get_df_query_pair(list_queries):
+    async def get_df_query_pair(list_queries):
     #------------------------------------------------------------------------------------------------------
         urls = []
         simple_queries = []
@@ -291,7 +289,7 @@ class FinamQuery(Query):
                 simple_queries.append(list_queries[index])
         
         #-----------
-        results = asyncio.run(FinamQuery.fetch_all(urls, simple_queries))
+        results = await FinamQuery.fetch_all(urls, simple_queries)
         #------------
 
         last_query = results[0][1]
@@ -352,8 +350,8 @@ class FinamQuery(Query):
                            self.queries[0][Query_Parameter.path])
     #List[query_classes.FinamQuery]
     @staticmethod
-    def multi_export_to_file(list_queries) -> None:
-        res = FinamQuery.get_df_query_pair(list_queries)
+    async def multi_export_to_file(list_queries) -> None:
+        res = await FinamQuery.get_df_query_pair(list_queries)
         for element in res:
             filename = element[1].file_format()
             full_path = element[1].queries[0][query_classes.Query_Parameter.path] + filename + '.txt'
@@ -361,8 +359,8 @@ class FinamQuery(Query):
             element[0].to_csv(full_path, index=False)
 
     @staticmethod
-    def multi_export_to_df(list_queries)-> List[pd.DataFrame]:
-            res = FinamQuery.get_df_query_pair(list_queries)
+    async def multi_export_to_df(list_queries)-> List[pd.DataFrame]:
+            res = await FinamQuery.get_df_query_pair(list_queries)
             r = [x[0] for x in res]
             return r
 
@@ -440,14 +438,14 @@ class MoexQuery():
             return results
 
     @staticmethod
-    def multi_export_to_df(list_queries) -> List[pd.DataFrame]:
-        results = asyncio.run(MoexQuery.fetch_all(list_queries))
+    async def multi_export_to_df(list_queries) -> List[pd.DataFrame]:
+        results = await MoexQuery.fetch_all(list_queries)
         return results
 
     @staticmethod
     # list_queries -> List[MoexQuery]
-    def multi_export_to_file(list_queries) -> None:
-        results = asyncio.run(MoexQuery.fetch_all(list_queries))
+    async def multi_export_to_file(list_queries) -> None:
+        results = await MoexQuery.fetch_all(list_queries)
         for i in range(len(list_queries)):
             filename = list_queries[i].file_format()
             full_path = list_queries[i].path + filename + '.txt'
@@ -463,7 +461,6 @@ class MoexQuery():
 
     def create_higher_TF_query(self): #same subtype as self
         # print(check)
-        print(type(self))
         check = DICT_HIGHER_TIMEFRAME[self.period]
         percent = 1. / check[1]
         start = self.date_begin
