@@ -47,7 +47,6 @@ DICT_PERIOD_NAMES = {
     Period.month:   'M',
 }
     
-
 DICT_HIGHER_TIMEFRAME = {
     Period.tick :   [Period.min1, 5.],#!didn't analyze lol
     Period.min1 :   [Period.min5, 5.], #*5
@@ -177,8 +176,6 @@ class Query(ABC):
         frame = correct_date_iso_series(frame)
         frame[COL_NAMES.date_to_plot] = frame[COL_NAMES.date_iso].dt.strftime(f"%y-%m-%d\n%H-%m")
         return frame
-
-
 class FinamQuery(Query):
 #private:
     #queries = [[market, code, date_begin1, date_end1, period, path], [market, code, date_begin2, date_end2, period, path]]
@@ -363,7 +360,6 @@ class FinamQuery(Query):
             res = await FinamQuery.get_df_query_pair(list_queries)
             r = [x[0] for x in res]
             return r
-
 class MoexQuery():
     def __init__(self, code: string, date_begin: string, date_end: string, period: Period, path: string):
         self.period = period
@@ -443,7 +439,7 @@ class MoexQuery():
         return results
 
     @staticmethod
-    # list_queries -> List[MoexQuery]
+    # list_queries: List[MoexQuery]
     async def multi_export_to_file(list_queries) -> None:
         results = await MoexQuery.fetch_all(list_queries)
         for i in range(len(list_queries)):
@@ -482,13 +478,3 @@ class MoexQuery():
         return MoexQuery(self.code,
                         start_date_str, end_date_str, check[0],
                         self.path)
-    
-
-
-
-
-
-
-
-
-

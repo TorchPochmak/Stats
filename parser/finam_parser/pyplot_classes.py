@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import IntEnum, StrEnum
+from typing import List
 
 import matplotlib
 from matplotlib import pyplot as plt
@@ -17,7 +18,7 @@ class LineType(StrEnum):
 class Shape(ABC):
 
     @abstractmethod
-    def draw(self, frame: pd.DataFrame):
+    def draw(self, ax: plt.Axes, frame: pd.DataFrame, remember: bool):
         pass
 
     def get_min_y(self, prices: pd.DataFrame):
@@ -42,6 +43,8 @@ class Candle(Shape):
         self.error_bar_bottom = fr.COL_NAMES.low
         self.error_bar_up = fr.COL_NAMES.high
         self.x_index = fr.COL_NAMES.date_to_plot
+        self.first_bar = None
+        self.second_bar = None
     @property
     def get_shape_type(self) -> ShapeType:
         return ShapeType.Candle 
@@ -60,15 +63,34 @@ class Candle(Shape):
     def get_max_y(self, prices: pd.DataFrame):
         return max(prices[self.error_bar_up])
 
-    def draw(self, prices: pd.DataFrame):
+    def draw(self, ax: plt.Axes, prices: pd.DataFrame, remember: bool = True):
             #only draws a line, no clue about scaling, titles and axes stuff...
             col1 = self.color_up
             col2 = self.color_down
             colors = [col1 if prices[self.bar_bottom][x] >= prices[self.bar_up][x] else col2 for x in range(len(prices))]
-            plt.bar (prices[self.x_index], prices[self.error_bar_up] - prices[self.error_bar_bottom], 
+            if(self.first_bar == None):
+                self.first_bar = ax.bar (prices[self.x_index], prices[self.error_bar_up] - prices[self.error_bar_bottom], 
                     self.width_min_max, bottom=prices[self.error_bar_bottom], color=colors, edgecolor=(0,0,0,0))
-            plt.bar (prices[self.x_index], prices[self.bar_up] - prices[self.bar_bottom], 
+                if(remember == False):
+                    self.first_bar = None
+            else:
+                for i, rect in enumerate(self.first_bar):
+                    #rect.set_x(prices[self.x_index][i])
+                    rect.set_height(prices[self.error_bar_up][i] - prices[self.error_bar_bottom][i])
+                    rect.set_y(prices[self.error_bar_bottom][i])
+                    rect.set_color(colors[i])
+            
+            if(self.second_bar == None):
+                self.second_bar = ax.bar (prices[self.x_index], prices[self.bar_up] - prices[self.bar_bottom], 
                     self.width_candle, bottom=prices[self.bar_bottom], color=colors, edgecolor=(0,0,0,0))
+                if(remember == False):
+                    self.second_bar = None
+            else:
+                for i, rect in enumerate(self.second_bar):
+                    #rect.set_x(prices[self.x_index][i])
+                    rect.set_height(prices[self.bar_up][i] - prices[self.bar_bottom][i])
+                    rect.set_y(prices[self.bar_bottom][i])
+                    rect.set_color(colors[i])
 
 class Line(Shape):
     def __init__(self, format: str = '-', color: str = (1,1,1,0.5), 
@@ -79,6 +101,7 @@ class Line(Shape):
         self.frame_export_type = frame_export_type
         self.column_x = fr.COL_NAMES.date_to_plot
         self.column_y = frame_export_type
+        self.cur_plot = None
     
     @property
     def get_shape_type(self) -> ShapeType:
@@ -93,9 +116,15 @@ class Line(Shape):
         self.column_x = new_x
         self.column_y = new_y
 
-    def draw(self, prices: pd.DataFrame):
-        plt.plot(prices[self.column_x], prices[self.column_y], 
+    def draw(self, ax: plt.Axes, prices: pd.DataFrame, remember: bool = True):
+        if(self.cur_plot == None):
+            self.cur_plot = ax.plot(prices[self.column_x], prices[self.column_y], 
                  self.format, linewidth=self.linewidth, color=self.color)
+            if(remember == False):
+                self.cur_plot = None
+        else:
+            self.cur_plot[0].set_data(prices[self.column_x, prices[self.column_y]])
+        
 
 class Rect():
     def __init__(self, facecolor: str = (228/256, 223/256, 225/256, 0.3),
@@ -144,7 +173,6 @@ class Rect():
     def draw_rect(self, ax: plt.Axes, rect: plt.Rectangle):
         ax.add_patch(rect)
 
-
 class MainFigure():
     def __init__(self, bg_color: str = '#090625', ticks_color: str = 'white', grid_color: str = 'gray',
 
@@ -186,18 +214,18 @@ class MainFigure():
     #?grid_spec is only for MainFigure, use mg.gs[a:b, c:d]
     #? for frame: typical, frame.index -> 0,1,2,3...............
 
-    def draw_subplot(self,  shape: Shape, frame: pd.DataFrame, part_gs, count_x = 0, count_y = 0, 
-                     x_min_int = 0, x_max_int = 0, y_min_int = 0, y_max_int = 0): 
+    def draw_subplot(self, fg_ax: plt.Axes, shape: Shape, frame: pd.DataFrame, count_x = 0, count_y = 0, 
+                     x_min_int = 0, x_max_int = 0, y_min_int = 0, y_max_int = 0, remember: bool = False): 
         if(x_max_int == 0): x_max_int = len(frame)
         if(y_max_int == 0): y_max_int = len(frame)
-        fg_ax = self.fg.add_subplot(part_gs)
         self.set_axes_theme(fg_ax)
         if(count_x > 0):
-            plt.xticks(np.arange(x_min_int, x_max_int, x_max_int / count_x), fontsize = 7)
+            fg_ax.set_xticks(np.arange(x_min_int, x_max_int, x_max_int / count_x))
+            fg_ax.tick_params(axis='x', labelsize=7)
         if(count_y > 0):
-            plt.yticks(np.arange(y_min_int, y_max_int, y_max_int / count_y), fontsize = 7)
-        shape.draw(frame)
-        return fg_ax
+            fg_ax.set_yticks(np.arange(y_min_int, y_max_int, y_max_int / count_y))
+            fg_ax.tick_params(axis='y', labelsize=7)
+        shape.draw(fg_ax, frame, remember)
 
 #INCLUSIVE
 def get_gs_part(gs: matplotlib.gridspec.GridSpec,
@@ -260,11 +288,11 @@ def get_gs_part(gs: matplotlib.gridspec.GridSpec,
 # -------------------------------------------------  -------------------------------------------------
 #endregion
 
-def grid_type1(mf: MainFigure) -> list:
+def grid_type1(mf: MainFigure) -> List[plt.SubplotSpec]:
     return [get_gs_part(mf.grid_spec)]
 
 def grid_type2(mf: MainFigure, count: int, 
-               interval_y: int = 2, center_y: int = -1) -> list:
+               interval_y: int = 2, center_y: int = -1) -> List[plt.SubplotSpec]:
     if(center_y == -1):
         center_y = int(mf.size_y * 2/3)
     res = []
@@ -280,7 +308,7 @@ def grid_type2(mf: MainFigure, count: int,
 
 def grid_type3(mf: MainFigure, count: int, 
     interval_x: int = 8, interval_y: int = 2,
-    center_x: int = -1, center_y: int = -1):
+    center_x: int = -1, center_y: int = -1) -> List[plt.SubplotSpec]:
 
     if(center_x == -1):
             center_x = int(mf.size_x * 2/3)

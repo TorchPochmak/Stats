@@ -11,35 +11,7 @@ from .http_queries import *
 
 from enum import StrEnum
 
-class COL_NAMES(StrEnum):
-    ticker = 'ticker', #str
-    per = 'per', #str
-    date = 'date', #str
-    time = 'time', #str
-    open = 'open', #float
-    high = 'high', #float
-    low = 'low', #float
-    close = 'close', #float
-    vol = 'vol', #float
-    date_iso = 'date_iso' #DateTime pandas
-    date_to_plot = 'date_to_plot'
-
-COLUMNS = [COL_NAMES.ticker, COL_NAMES.per, COL_NAMES.date, COL_NAMES.time, 
-    COL_NAMES.open, COL_NAMES.high, COL_NAMES.low, COL_NAMES.close, COL_NAMES.vol, COL_NAMES.date_iso, COL_NAMES.date_to_plot]
-
-def correct_date_iso_element(element: str) -> str:
-    #1302231110
-    #13-02-23T11:10
-    return f'{element[0:2]}-{element[2:4]}-{element[4:6]} {element[6:8]}:{element[8:10]}'
-
-def correct_date_iso_series(frame: pd.DataFrame):
-    #13-02-23T11:10
-    frame[COL_NAMES.date_iso] = frame[COL_NAMES.date] + frame[COL_NAMES.time]
-    frame[COL_NAMES.date_iso] = frame[COL_NAMES.date_iso].apply(correct_date_iso_element)
-    frame[COL_NAMES.date_iso] = pd.to_datetime(frame[COL_NAMES.date_iso], format=f'%d-%m-%y %H:%M')
-
-    return frame
-
+#!DEPRECATED
 #csv file -> pd.DataFrame
 def import_from_file(filepath: str, sep: str = ',') -> pd.DataFrame:
     if(os.path.isfile(filepath) == False):

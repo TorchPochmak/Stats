@@ -28,9 +28,8 @@ tm_to_code = {}
 markts = {}
 emitents = {}
 
-
-
 #HTTP Get export base info
+#?no need if has finam_info
 def http_get_finam_info():
 
     # #TODO how to create unique OK cookie every time I don't know
@@ -82,7 +81,6 @@ def http_get_finam_info():
         tm_to_code[(t,m)] = c
         markts.setdefault(t, []).append(m)
         emitents.setdefault(m, []).append(t.strip('\''))
-
 #--------------------------------------------------------------------------------------------------------
 
 def define_emitent_code(ticker, market):
