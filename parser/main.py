@@ -64,13 +64,15 @@ async def draw(prices):
     real_rect = rect.get_rect_percent(prices_second, 'left', GLOBAL_HIGHER_TF_PERCENTAGE, 'left', mn_y_second, mx_y_second)
     rect.draw_rect(fg_ax_last, real_rect)
     #---------------------------------------------------------------------
-    res = await get_indicators_current(moex_info.FINANCE, [tti.indicators.StochasticOscillator, tti.indicators.RelativeStrengthIndex], 
-                                '2024-04-26', period=Period.hour, sort_by='rsi')
+    res = await get_indicators_current(moex_info.INTERESTED, [tti.indicators.StochasticOscillator, tti.indicators.RelativeStrengthIndex], 
+                                '2024-05-31', period=Period.hour, sort_by='rsi')
     res = float_round_series(res, res.columns[2:], 4)
+    print(res.to_string())
     draw_table(parts_ax[1], res)
+   
+
 
 async def main():
-    global prices
     download_path = './DATA/'
     mkpath(download_path)
     #----------------------------------------------------------------------------------------------------s

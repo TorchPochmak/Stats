@@ -439,7 +439,7 @@ class MoexQuery():
         return results
 
     @staticmethod
-    # list_queries: List[MoexQuery]
+    # list_queries -> List[MoexQuery]
     async def multi_export_to_file(list_queries) -> None:
         results = await MoexQuery.fetch_all(list_queries)
         for i in range(len(list_queries)):
@@ -478,3 +478,4 @@ class MoexQuery():
         return MoexQuery(self.code,
                         start_date_str, end_date_str, check[0],
                         self.path)
+    
