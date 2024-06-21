@@ -64,7 +64,7 @@ async def draw(prices):
     real_rect = rect.get_rect_percent(prices_second, 'left', GLOBAL_HIGHER_TF_PERCENTAGE, 'left', mn_y_second, mx_y_second)
     rect.draw_rect(fg_ax_last, real_rect)
     #---------------------------------------------------------------------
-    res = await get_indicators_current(moex_info.INTERESTED, [tti.indicators.StochasticOscillator, tti.indicators.RelativeStrengthIndex], 
+    res = await get_indicators_current(moex_info.ENERGY_MINERALS, [tti.indicators.StochasticOscillator, tti.indicators.RelativeStrengthIndex], 
                                 '2024-05-31', period=Period.hour, sort_by='rsi')
     res = float_round_series(res, res.columns[2:], 4)
     print(res.to_string())
@@ -76,7 +76,7 @@ async def main():
     download_path = './DATA/'
     mkpath(download_path)
     #----------------------------------------------------------------------------------------------------s
-    sber2 = MoexQuery('SBER', '2022-01-10', '2023-05-15', Period.day, download_path)
+    sber2 = MoexQuery('GAZP', '2023-06-21', '2024-06-21', Period.day, download_path)
     prices = await MoexQuery.multi_export_to_df([sber2, sber2.create_higher_TF_query()])
     await draw(prices)
     #plt.show()
