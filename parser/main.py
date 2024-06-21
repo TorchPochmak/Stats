@@ -15,14 +15,14 @@ import urllib.request
 import string
 from distutils.dir_util import mkpath
 
-import finam_parser.tti as tti
-from finam_parser.query_classes import *
-import finam_parser.http_queries as queries
-from finam_parser.pyplot_classes import *
-import finam_parser.calc_inds as calc_inds
+import parser.tti as tti
+from parser.query_classes import *
+import parser.http_queries as queries
+from parser.pyplot_classes import *
+import parser.calc_inds as calc_inds
 
-import finam_parser.file_work as fw
-from finam_parser.plot_table import *
+import parser.file_work as fw
+from parser.plot_table import *
 #--------------------------------------------------------------------------------------------------------v
 
 async def draw(prices):

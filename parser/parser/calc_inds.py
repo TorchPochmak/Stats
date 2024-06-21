@@ -1,12 +1,12 @@
 from enum import StrEnum
-import finam_parser.query_classes as queries
-import finam_parser.pyplot_classes 
+import parser.query_classes as queries
+import parser.pyplot_classes 
 
 from typing import Type
 
 from distutils.dir_util import mkpath
 
-import finam_parser.tti as tti
+import parser.tti as tti
 
 import numpy as np
 import pandas as pd

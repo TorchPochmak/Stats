@@ -13,8 +13,8 @@ indicators from stocks data. The library provides an API for:
 Project site is https://www.trading-technical-indicators.org/
 """
 
-from finam_parser.tti import indicators
-from finam_parser.tti import utils
+from parser.tti import indicators
+from parser.tti import utils
 
 __version__ = '0.2.2'
 
